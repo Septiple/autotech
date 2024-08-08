@@ -1,0 +1,17 @@
+{
+  "name": "autotech",
+  "version": "0.1.0",
+  "factorio_version": "1.1",
+  "title": "Autotech",
+  "author": "Quintuple5",
+  "contact": "https://discord.gg/SBHM3h5Utj",
+  "homepage": "https://github.com/Septiple/autotech",
+  "description": "Overhauls the technology tree to make sure prerequisites are set based on unlocked recipes.",
+  "dependencies": [
+    "base >= 1.1.0"
+  ],
+  "package": {
+    "ignore": [],
+    "scripts": {}
+  }
+}
