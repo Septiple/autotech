@@ -1,3 +1,5 @@
+unfiltered_input/
+
 # Compiled Lua sources
 luac.out
 
