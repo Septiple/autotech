@@ -6,6 +6,7 @@ The autotech module has several main goals. The first two are shared with the ol
 - report as much useful information as possible to help development. Do cheap checks for errors early. Have an option to turn on verbose logging to debug more complicated issues.
 - run independently of Py, so other mods may be able to use it too
 - order recipes in the tech screen in order of usage
+- set technology-order to a sensible value
 
 There are two versions of this explanation. The first gives all the details including a rationale but assumes a computer science background, the second only assumes you know what a directed graph is and is mainly tailored to users of autotech.
 

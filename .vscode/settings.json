@@ -1,0 +1,38 @@
+{
+    "Lua.completion.autoRequire": false,
+    "Lua.diagnostics.globals": [
+        "create_object_class",
+        "__Profiler"
+    ],
+    "factorio.versions": [
+        {
+            "name": "Steam",
+            "factorioPath": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Factorio\\bin\\x64\\factorio.exe",
+            "active": true
+        }
+    ],
+    "Lua.workspace.library": [
+        "c:\\Program Files (x86)\\Steam\\steamapps\\common\\Factorio\\data",
+        "c:/Users/Alex/AppData/Roaming/Code/User/workspaceStorage/92495a87397f891c777f918349712165/justarandomgeek.factoriomod-debug/sumneko-3rd/factorio/library"
+    ],
+    "Lua.workspace.userThirdParty": [
+        "c:\\Users\\Alex\\AppData\\Roaming\\Code\\User\\workspaceStorage\\18ac539465851928e7a692dff2b169e1\\justarandomgeek.factoriomod-debug\\sumneko-3rd"
+    ],
+    "Lua.runtime.builtin": {
+        "io": "disable",
+        "os": "disable",
+        "math": "disable",
+        "debug": "disable",
+        "coroutine": "disable",
+        "package": "disable"
+    },
+    "Lua.runtime.version": "Lua 5.2",
+    "Lua.runtime.special": {
+        "__object_name": "type"
+    },
+    "Lua.diagnostics.disable": [
+        "lowercase-global"
+    ],
+    "Lua.runtime.plugin": "c:/Users/Alex/AppData/Roaming/Code/User/workspaceStorage/92495a87397f891c777f918349712165/justarandomgeek.factoriomod-debug/sumneko-3rd/factorio/plugin.lua",
+    "Lua.workspace.checkThirdParty": "ApplyInMemory"
+}

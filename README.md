@@ -7,6 +7,7 @@ Autotech is a mod that analyses the 'true' dependencies between recipes and tech
   - this allows for slowly scaling tech costs
   - can enforce that all techs require at least the same science packs as its dependencies
 - order the recipes in the tech screen according to which one is used first
+- set technology-order to a sensible value
 - remove superfluous dependencies between techs: if A depends on B and B depends on C, then A doesn't need to also depend on C
 
 Various parts of these features are allowed to be precomputed in a 'cache file', with two benefits:

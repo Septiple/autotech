@@ -1,8 +1,9 @@
 local configuration = {
-    verbose_logging = settings.startup["pypp-verbose-logging"].value,
+    verbose_logging = true,--settings.startup["pypp-verbose-logging"].value,
 }
 
 local deque = require "utils.deque"
+local entity_prototypes = require "entity_prototypes"
 
 local node_types = require "nodes.node_types"
 
@@ -23,12 +24,13 @@ local technology_node = require "nodes.technology_node"
 local auto_tech = {}
 auto_tech.__index = auto_tech
 
-function auto_tech.create()
+function auto_tech.create(data_raw)
     local a = {}
     setmetatable(a, auto_tech)
 
     a.nodes_per_node_type = {}
-
+    a.data_raw = data_raw
+    a.entity_prototypes = entity_prototypes
     return a
 end
 
@@ -89,34 +91,34 @@ function auto_tech:create_nodes()
         end
     end
 
-    process_type(data.raw["ammo-category"], ammo_category_node)
-    process_type(data.raw["equipment-grid"], equipment_grid_node)
-    process_type(data.raw["fluid"], fluid_node)
-    process_type(data.raw["fuel-category"], fuel_category_node)
-    process_type(data.raw["recipe-category"], recipe_category_node)
-    process_type(data.raw["recipe"], recipe_node)
-    process_type(data.raw["resource-category"], resource_category_node)
-    process_type(data.raw["resource"], entity_node)
-    process_type(data.raw["technology"], technology_node)
+    process_type(self.data_raw["ammo-category"], ammo_category_node)
+    process_type(self.data_raw["equipment-grid"], equipment_grid_node)
+    process_type(self.data_raw["fluid"], fluid_node)
+    process_type(self.data_raw["fuel-category"], fuel_category_node)
+    process_type(self.data_raw["recipe-category"], recipe_category_node)
+    process_type(self.data_raw["recipe"], recipe_node)
+    process_type(self.data_raw["resource-category"], resource_category_node)
+    process_type(self.data_raw["resource"], entity_node)
+    process_type(self.data_raw["technology"], technology_node)
 
-    process_type(data.raw["armor"], item_node)
-    process_type(data.raw["ammo"], item_node)
-    process_type(data.raw["capsule"], item_node)
-    process_type(data.raw["gun"], item_node)
-    process_type(data.raw["item"], item_node)
-    process_type(data.raw["item-with-entity-data"], item_node)
-    process_type(data.raw["item-with-inventory"], item_node)
-    process_type(data.raw["item-with-label"], item_node)
-    process_type(data.raw["item-with-tags"], item_node)
-    process_type(data.raw["mining-tool"], item_node)
-    process_type(data.raw["module"], item_node)
-    process_type(data.raw["spidertron-remote"], item_node)
-    process_type(data.raw["rail-planner"], item_node)
-    process_type(data.raw["repair-tool"], item_node)
-    process_type(data.raw["tool"], item_node)
+    process_type(self.data_raw["armor"], item_node)
+    process_type(self.data_raw["ammo"], item_node)
+    process_type(self.data_raw["capsule"], item_node)
+    process_type(self.data_raw["gun"], item_node)
+    process_type(self.data_raw["item"], item_node)
+    process_type(self.data_raw["item-with-entity-data"], item_node)
+    process_type(self.data_raw["item-with-inventory"], item_node)
+    process_type(self.data_raw["item-with-label"], item_node)
+    process_type(self.data_raw["item-with-tags"], item_node)
+    process_type(self.data_raw["mining-tool"], item_node)
+    process_type(self.data_raw["module"], item_node)
+    process_type(self.data_raw["spidertron-remote"], item_node)
+    process_type(self.data_raw["rail-planner"], item_node)
+    process_type(self.data_raw["repair-tool"], item_node)
+    process_type(self.data_raw["tool"], item_node)
 
-    for entity_name, _ in pairs(defines.prototypes.entity) do
-        for _, value in pairs(data.raw[entity_name]) do
+    for entity_name, _ in pairs(self.entity_prototypes) do
+        for _, value in pairs(self.data_raw[entity_name]) do
             entity_node:create(value, self.nodes_per_node_type, configuration)
         end
     end
