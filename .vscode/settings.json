@@ -1,4 +1,13 @@
 {
+    "terminal.integrated.profiles.windows": {
+    "PowerShell": {
+        "source": "PowerShell",
+        "overrideName": true,
+        "icon": "terminal-powershell",
+        "args": [ "-ExecutionPolicy", "Bypass"]
+    }
+    },
+    "terminal.integrated.defaultProfile.windows": "PowerShell",
     "Lua.completion.autoRequire": false,
     "Lua.diagnostics.globals": [
         "create_object_class",
