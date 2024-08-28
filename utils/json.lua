@@ -1,6 +1,10 @@
 -- Code from https://stackoverflow.com/a/40857186 - let's hope it works. Annotations added later.
 
+---@class json
+---@field private null table
 local json = {}
+
+json.null = {}  -- This is a one-off table to represent the null value.
 
 -- Internal functions.
 
@@ -119,10 +123,8 @@ function json.stringify(obj, as_key)
   return table.concat(s)
 end
 
-json.null = {}  -- This is a one-off table to represent the null value.
-
 ---@param str string
----@param pos integer
+---@param pos integer?
 ---@param end_delim string?
 ---@return any, integer
 function json.parse(str, pos, end_delim)

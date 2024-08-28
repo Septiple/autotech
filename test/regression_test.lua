@@ -14,6 +14,7 @@ if f == nil then
     return
 end
 
+---@type string
 local content_as_string = f:read("*all")
 f:close()
 
