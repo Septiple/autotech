@@ -1,12 +1,14 @@
--- Code from https://stackoverflow.com/a/40857186 - let's hope it works
+-- Code from https://stackoverflow.com/a/40857186 - let's hope it works. Annotations added later.
 
 local json = {}
 
-
 -- Internal functions.
 
+---@param obj any
+---@return "boolean"|"function"|"nil"|"number"|"string"|"table"|"array"|"thread"|"userdata"
 local function kind_of(obj)
   if type(obj) ~= 'table' then return type(obj) end
+  ---@cast obj table
   local i = 1
   for _ in pairs(obj) do
     if obj[i] ~= nil then i = i + 1 else return 'table' end
@@ -14,6 +16,8 @@ local function kind_of(obj)
   if i == 1 then return 'table' else return 'array' end
 end
 
+---@param s string
+---@return string
 local function escape_str(s)
   local in_char  = {'\\', '"', '/', '\b', '\f', '\n', '\r', '\t'}
   local out_char = {'\\', '"', '/',  'b',  'f',  'n',  'r',  't'}
@@ -23,10 +27,15 @@ local function escape_str(s)
   return s
 end
 
--- Returns pos, did_find; there are two cases:
--- 1. Delimiter found: pos = pos after leading space + delim; did_find = true.
--- 2. Delimiter not found: pos = pos after leading space;     did_find = false.
--- This throws an error if err_if_missing is true and the delim is not found.
+--- Returns pos, did_find; there are two cases:
+--- 1. Delimiter found: pos = pos after leading space + delim; did_find = true.
+--- 2. Delimiter not found: pos = pos after leading space;     did_find = false.
+--- This throws an error if err_if_missing is true and the delim is not found.
+---@param str string
+---@param pos integer
+---@param delim string
+---@param err_if_missing boolean?
+---@return integer, boolean
 local function skip_delim(str, pos, delim, err_if_missing)
   pos = pos + #str:match('^%s*', pos)
   if str:sub(pos, pos) ~= delim then
@@ -38,8 +47,12 @@ local function skip_delim(str, pos, delim, err_if_missing)
   return pos + 1, true
 end
 
--- Expects the given pos to be the first character after the opening quote.
--- Returns val, pos; the returned pos is after the closing quote character.
+--- Expects the given pos to be the first character after the opening quote.
+--- Returns val, pos; the returned pos is after the closing quote character.
+---@param str string
+---@param pos integer
+---@param val string?
+---@return string, integer
 local function parse_str_val(str, pos, val)
   val = val or ''
   local early_end_error = 'End of input found while parsing string.'
@@ -54,7 +67,10 @@ local function parse_str_val(str, pos, val)
   return parse_str_val(str, pos + 2, val .. (esc_map[nextc] or nextc))
 end
 
--- Returns val, pos; the returned pos is after the number's final character.
+--- Returns val, pos; the returned pos is after the number's final character.
+---@param str string
+---@param pos integer
+---@return integer, integer
 local function parse_num_val(str, pos)
   local num_str = str:match('^-?%d+%.?%d*[eE]?[+-]?%d*', pos)
   local val = tonumber(num_str)
@@ -62,9 +78,11 @@ local function parse_num_val(str, pos)
   return val, pos + #num_str
 end
 
-
 -- Public values and functions.
 
+---@param obj any
+---@param as_key boolean?
+---@return string
 function json.stringify(obj, as_key)
   local s = {}  -- We'll build the string as an array of strings to be concatenated.
   local kind = kind_of(obj)  -- This is 'array' if it's an array or type(obj) otherwise.
@@ -103,6 +121,10 @@ end
 
 json.null = {}  -- This is a one-off table to represent the null value.
 
+---@param str string
+---@param pos integer
+---@param end_delim string?
+---@return any, integer
 function json.parse(str, pos, end_delim)
   pos = pos or 1
   if pos > #str then error('Reached unexpected end of input.') end

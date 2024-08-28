@@ -1,3 +1,5 @@
+-- Severely adapted from https://stackoverflow.com/a/18844036
+
 --- @class deque
 --- @field private first integer
 --- @field private last integer
@@ -30,7 +32,7 @@ end
 
 function deque:pop_left()
     local first = self.first
-    if first > self.last then error("self is empty") end
+    if first > self.last then error("deque is empty") end
     local value = self[first]
     self[first] = nil
     self.first = first + 1
@@ -39,7 +41,7 @@ end
 
 function deque:pop_right()
     local last = self.last
-    if self.first > last then error("self is empty") end
+    if self.first > last then error("deque is empty") end
     local value = self[last]
     self[last] = nil
     self.last = last - 1
