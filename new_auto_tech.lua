@@ -1,7 +1,3 @@
-local configuration = {
-    verbose_logging = true,--settings.startup["pypp-verbose-logging"].value,
-}
-
 local deque = require "utils.deque"
 local entity_prototypes = require "entity_prototypes"
 
@@ -21,16 +17,24 @@ local resource_category_node = require "nodes.resource_category_node"
 local start_node = require "nodes.start_node"
 local technology_node = require "nodes.technology_node"
 
+--- @class auto_tech
 local auto_tech = {}
 auto_tech.__index = auto_tech
 
-function auto_tech.create(data_raw)
+--- @alias Configuration { verbose_logging: boolean }
+
+---comment
+---@param data_raw any
+---@param configuration Configuration
+---@return auto_tech
+function auto_tech.create(data_raw, configuration)
     local a = {}
     setmetatable(a, auto_tech)
 
     a.nodes_per_node_type = {}
     a.data_raw = data_raw
     a.entity_prototypes = entity_prototypes
+    a.configuration = configuration
     return a
 end
 
@@ -81,13 +85,13 @@ function auto_tech:create_nodes()
         self.nodes_per_node_type[node_type] = {}
     end
 
-    start_node:create(self.nodes_per_node_type, configuration)
-    electricity_node:create(self.nodes_per_node_type, configuration)
-    fluid_fuel_node:create(self.nodes_per_node_type, configuration)
+    start_node:create(self.nodes_per_node_type, self.configuration)
+    electricity_node:create(self.nodes_per_node_type, self.configuration)
+    fluid_fuel_node:create(self.nodes_per_node_type, self.configuration)
 
     local function process_type(table, node_type)
         for _, object in pairs(table) do
-            node_type:create(object, self.nodes_per_node_type, configuration)
+            node_type:create(object, self.nodes_per_node_type, self.configuration)
         end
     end
 
@@ -119,7 +123,7 @@ function auto_tech:create_nodes()
 
     for entity_name, _ in pairs(self.entity_prototypes) do
         for _, value in pairs(self.data_raw[entity_name]) do
-            entity_node:create(value, self.nodes_per_node_type, configuration)
+            entity_node:create(value, self.nodes_per_node_type, self.configuration)
         end
     end
 end
@@ -133,7 +137,7 @@ function auto_tech:link_nodes()
 end
 
 function auto_tech:linearise_recipe_graph()
-    local verbose_logging = configuration.verbose_logging
+    local verbose_logging = self.configuration.verbose_logging
     local q = deque.new()
     for _, node_type in pairs(self.nodes_per_node_type) do
         for _, node in pairs(node_type) do

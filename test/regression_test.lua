@@ -22,7 +22,7 @@ local content = json.parse(content_as_string)
 
 print("Invoking autotech...")
 
-local autotech = autotech_class.create(content)
+local autotech = autotech_class.create(content, { verbose_logging = false})
 autotech:run()
 
 print("Finished test")
