@@ -1,28 +1,32 @@
+--- @module "configuration_meta"
+--- @module "factorio_meta"
+
 local node_types = require "nodes.node_types"
 local item_verbs = require "verbs.item_verbs"
 local fluid_verbs = require "verbs.fluid_verbs"
 
+---@class ObjectNodeBase
+---@field private __index table
+---@field private node_type NodeType
 local object_node_base = {}
 object_node_base.__index = object_node_base
 
-function object_node_base:create_class_impl(type_name, node_type, create_method)
+---@param type_name string
+---@param node_type NodeType
+---@return ObjectNodeBase
+function object_node_base:create_object_class(type_name, node_type)
     local object_class = { type_name = type_name }
     object_class.__index = object_class
     setmetatable(object_class, {__index = object_node_base})
     object_class.node_type = node_type
-    object_class.create = create_method
     return object_class
 end
 
-function object_node_base:create_unique_class(type_name, node_type)
-    return object_node_base:create_class_impl(type_name, node_type, object_node_base.create_unique)
-end
-
-function object_node_base:create_object_class(type_name, node_type)
-    return object_node_base:create_class_impl(type_name, node_type, object_node_base.create_object)
-end
-
-function object_node_base:create_object(object, nodes, configuration)
+---@param object FactorioThing?
+---@param nodes any
+---@param configuration Configuration
+---@return ObjectNodeBase
+function object_node_base:create(object, nodes, configuration)
     local s = {}
     -- Yes, we're setting up the inheritance in the base class, this skips all the cumbersome base class calls we don't need anyway
     setmetatable(s, self.__index)
@@ -114,10 +118,6 @@ function object_node_base:release_dependents()
     end
     
     return newly_independent_nodes
-end
-
-function object_node_base:create_unique(nodes, configuration)
-    return self:create_object(nil, nodes, configuration)
 end
 
 function object_node_base:lookup_dependency(nodes, node_type, node_name)

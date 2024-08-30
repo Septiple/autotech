@@ -1,3 +1,5 @@
+--- @module "factorio_meta"
+
 local deque = require "utils.deque"
 local entity_prototypes = require "entity_prototypes"
 
@@ -18,13 +20,14 @@ local start_node = require "nodes.start_node"
 local technology_node = require "nodes.technology_node"
 
 --- @class auto_tech
+--- @field configuration Configuration
+--- @field data_raw DataRaw
+--- @field entity_prototypes { [string]:0 }
+--- @field nodes_per_node_type table<NodeType, ObjectNodeBase>
 local auto_tech = {}
 auto_tech.__index = auto_tech
 
---- @alias Configuration { verbose_logging: boolean }
-
----comment
----@param data_raw any
+---@param data_raw DataRaw
 ---@param configuration Configuration
 ---@return auto_tech
 function auto_tech.create(data_raw, configuration)
@@ -85,10 +88,12 @@ function auto_tech:create_nodes()
         self.nodes_per_node_type[node_type] = {}
     end
 
-    start_node:create(self.nodes_per_node_type, self.configuration)
-    electricity_node:create(self.nodes_per_node_type, self.configuration)
-    fluid_fuel_node:create(self.nodes_per_node_type, self.configuration)
+    start_node:create(nil, self.nodes_per_node_type, self.configuration)
+    electricity_node:create(nil, self.nodes_per_node_type, self.configuration)
+    fluid_fuel_node:create(nil, self.nodes_per_node_type, self.configuration)
 
+    ---@param table FactorioThingGroup
+    ---@param node_type ObjectNodeBase
     local function process_type(table, node_type)
         for _, object in pairs(table) do
             node_type:create(object, self.nodes_per_node_type, self.configuration)

@@ -1,3 +1,4 @@
+---@enum NodeType
 return {
     ammo_category_node = 1,
     electricity_node = 2,
