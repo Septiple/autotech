@@ -4,9 +4,7 @@ local entity_verbs = require "verbs.entity_verbs"
 local item_verbs = require "verbs.item_verbs"
 local fuel_category_verbs = require "verbs.fuel_category_verbs"
 
-local item_node = object_node_base:create_object_class("item", node_types.item_node)
-
-function item_node:register_dependencies(nodes)
+local item_node = object_node_base:create_object_class("item", node_types.item_node, function(self, nodes)
     local item = self.object
     self:add_disjunctive_dependent(nodes, node_types.entity_node, item.place_result, "place result", entity_verbs.instantiate)
     --placed_as_equipment_result optional 	:: EquipmentID 
@@ -17,6 +15,6 @@ function item_node:register_dependencies(nodes)
     --AmmoItemPrototype - 'ammo' 
     --GunPrototype - 'gun' 
     --ArmorPrototype - 'armor' 
-end
+end)
 
 return item_node

@@ -7,9 +7,7 @@ local item_verbs = require "verbs.item_verbs"
 local fluid_verbs = require "verbs.fluid_verbs"
 local electricity_verbs = require "verbs.electricity_verbs"
 
-local entity_node = object_node_base:create_object_class("entity", node_types.entity_node)
-
-function entity_node:register_dependencies(nodes)
+local entity_node = object_node_base:create_object_class("entity", node_types.entity_node, function(self, nodes)
     local entity = self.object
 
     if entity.type == "resource" then
@@ -50,6 +48,6 @@ function entity_node:register_dependencies(nodes)
     --fluid_boxes
     --allowed_effects, module_specification
     --inputs (labs)
-end
+end)
 
 return entity_node

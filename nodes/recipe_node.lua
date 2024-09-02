@@ -2,9 +2,7 @@ local object_node_base = require "nodes.object_node_base"
 local node_types = require "nodes.node_types"
 local recipe_verbs = require "verbs.recipe_verbs"
 
-local recipe_node = object_node_base:create_object_class("recipe", node_types.recipe_node)
-
-function recipe_node:register_dependencies(nodes)
+local recipe_node = object_node_base:create_object_class("recipe", node_types.recipe_node, function(self, nodes)
     local recipe = self.object
     self:add_dependency(nodes, node_types.recipe_category_node, recipe.category or "crafting", "crafting category", "craft")
 
@@ -17,6 +15,6 @@ function recipe_node:register_dependencies(nodes)
     if recipe_data.enabled ~= false then
         self:add_disjunctive_dependency(nodes, node_types.start_node, 1, "starts enabled", recipe_verbs.enable)
     end
-end
+end)
 
 return recipe_node

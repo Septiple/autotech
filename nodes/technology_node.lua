@@ -3,9 +3,7 @@ local node_types = require "nodes.node_types"
 local item_verbs = require "verbs.item_verbs"
 local recipe_verbs = require "verbs.recipe_verbs"
 
-local technology_node = object_node_base:create_object_class("technology", node_types.technology_node)
-
-function technology_node:register_dependencies(nodes)
+local technology_node = object_node_base:create_object_class("technology", node_types.technology_node, function(self, nodes)
     local tech = self.object
     local tech_data = (type(tech.normal) == "table" and (tech.normal or tech.expensive) or tech)
 
@@ -18,6 +16,6 @@ function technology_node:register_dependencies(nodes)
             self:add_disjunctive_dependent(nodes, node_types.recipe_node, modifier.recipe, "enabled by tech", recipe_verbs.enable)
         end
     end
-end
+end)
 
 return technology_node
