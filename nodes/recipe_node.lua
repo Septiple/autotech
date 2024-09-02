@@ -19,6 +19,4 @@ function recipe_node:register_dependencies(nodes)
     end
 end
 
-setmetatable(recipe_node, object_node_base);
-
 return recipe_node

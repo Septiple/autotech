@@ -5,31 +5,39 @@ local node_types = require "nodes.node_types"
 local item_verbs = require "verbs.item_verbs"
 local fluid_verbs = require "verbs.fluid_verbs"
 
+---@class ObjectNodeCreator
+local object_node_creator = {}
+
 ---@class ObjectNodeBase
 ---@field private __index table
 ---@field private node_type NodeType
+---@field private type_name string
 local object_node_base = {}
 object_node_base.__index = object_node_base
 
 ---@param type_name string
 ---@param node_type NodeType
 ---@return ObjectNodeBase
-function object_node_base:create_object_class(type_name, node_type)
-    local object_class = { type_name = type_name }
+function object_node_creator:create_object_class(type_name, node_type)
+    local object_class = {}
     object_class.__index = object_class
-    setmetatable(object_class, {__index = object_node_base})
+    setmetatable(object_class, object_node_base)
     object_class.node_type = node_type
+    object_class.type_name = type_name
     return object_class
 end
+
+---@class ObjectNode
+---@field configuration Configuration
 
 ---@param object FactorioThing?
 ---@param nodes any
 ---@param configuration Configuration
----@return ObjectNodeBase
+---@return ObjectNode
 function object_node_base:create(object, nodes, configuration)
     local s = {}
     -- Yes, we're setting up the inheritance in the base class, this skips all the cumbersome base class calls we don't need anyway
-    setmetatable(s, self.__index)
+    setmetatable(s, self)
     s.configuration = configuration
     s.depends = {}
     s.reverse_depends = {}
@@ -244,4 +252,4 @@ function object_node_base:add_productlike_dependency_impl(nodes, single_product,
     end
 end
 
-return object_node_base
+return object_node_creator

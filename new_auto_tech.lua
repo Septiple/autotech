@@ -20,10 +20,10 @@ local start_node = require "nodes.start_node"
 local technology_node = require "nodes.technology_node"
 
 --- @class auto_tech
---- @field configuration Configuration
---- @field data_raw DataRaw
---- @field entity_prototypes { [string]:0 }
---- @field nodes_per_node_type table<NodeType, ObjectNodeBase>
+--- @field private configuration Configuration
+--- @field private data_raw DataRaw
+--- @field private entity_prototypes { [string]:0 }
+--- @field private nodes_per_node_type table<NodeType, ObjectNodeBase>
 local auto_tech = {}
 auto_tech.__index = auto_tech
 
@@ -155,7 +155,7 @@ function auto_tech:linearise_recipe_graph()
         end
     end
 
-    while (not q:is_empty()) do
+    while not q:is_empty() do
         local next = q:pop_left()
         if verbose_logging then
            log("Node " .. next.printable_name .. " is next in the linearisation.") 
