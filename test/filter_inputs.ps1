@@ -55,6 +55,33 @@ Foreach ($file in Get-ChildItem ".\unfiltered_input") {
     $JsonFile.PSObject.Properties.Remove("utility-sprites")
     $JsonFile.PSObject.Properties.Remove("virtual-signal")
     $JsonFile.PSObject.Properties.Remove("wind-sound")
+    
+    # 2.0 prototypes
+    $JsonFile.PSObject.Properties.Remove("airborne-pollutant")
+    $JsonFile.PSObject.Properties.Remove("chain-active-trigger")
+    $JsonFile.PSObject.Properties.Remove("change-surface-achievement")
+    $JsonFile.PSObject.Properties.Remove("complete-objective-achievement")
+    $JsonFile.PSObject.Properties.Remove("create-platform-achievement")
+    $JsonFile.PSObject.Properties.Remove("custom-event")
+    $JsonFile.PSObject.Properties.Remove("delayed-active-trigger")
+    $JsonFile.PSObject.Properties.Remove("deliver-by-robots-achievement")
+    $JsonFile.PSObject.Properties.Remove("deplete-resource-achievement")
+    $JsonFile.PSObject.Properties.Remove("destroy-cliff-achievement")
+    $JsonFile.PSObject.Properties.Remove("dont-kill-manually-achievement")
+    $JsonFile.PSObject.Properties.Remove("dont-research-before-researching-achievement")
+    $JsonFile.PSObject.Properties.Remove("dont-use-entity-in-energy-production-achievement")
+    $JsonFile.PSObject.Properties.Remove("equip-armor-achievement")
+    $JsonFile.PSObject.Properties.Remove("module-transfer-achievement")
+    $JsonFile.PSObject.Properties.Remove("noise-function")
+    $JsonFile.PSObject.Properties.Remove("place-equipment-achievement")
+    $JsonFile.PSObject.Properties.Remove("procession-layer-inheritance-group")
+    $JsonFile.PSObject.Properties.Remove("procession")
+    $JsonFile.PSObject.Properties.Remove("remote-controller")
+    $JsonFile.PSObject.Properties.Remove("research-with-science-pack-achievement")
+    $JsonFile.PSObject.Properties.Remove("shoot-achievement")
+    $JsonFile.PSObject.Properties.Remove("space-connection-distance-traveled-achievement")
+    $JsonFile.PSObject.Properties.Remove("use-item-achievement")
+
     Write-Output "Done filtering"
 
     $JsonFile | ConvertTo-Json -Compress -Depth 100 | Set-Content ".\filtered_input\$($file.name)"
