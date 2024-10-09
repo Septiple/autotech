@@ -51,11 +51,8 @@ local entity_node = object_node_base:create_object_class("entity", node_types.en
     self:add_disjunctive_dependent(nodes, node_types.item_node, entity.loot, "loot", item_verbs.create, "item")
     self:add_disjunctive_dependent(nodes, node_types.entity_node, entity.corpse, "corpse", entity_verbs.instantiate)
 
-    -- TODO: this code is problematic. What if a machine is unlocked after its module?
-    -- But then we also need to support the pY case of the machine requiring the module to function at all.
-    -- For now I have chosen to only support the pY case.
-    for _, module_category in pairs(entity.allowed_module_categories or {}) do
-        self:add_disjunctive_dependency(nodes, node_types.module_category_node, module_category, "allowed module category", module_category_verbs.requires)
+    if entity.autotech_force_require_module_categories then
+        self:add_disjunctive_dependency(nodes, node_types.module_category_node, entity.allowed_module_categories, "allowed module category", module_category_verbs.requires)
     end
 
     if entity.energy_usage then
@@ -79,9 +76,7 @@ local entity_node = object_node_base:create_object_class("entity", node_types.en
     self:add_disjunctive_dependent(nodes, node_types.recipe_category_node, entity.crafting_categories, "can craft", recipe_category_verbs.instantiate)
 
     if entity.type == "lab" then
-        for _, science_pack in pairs(entity.inputs) do
-            self:add_disjunctive_dependent(nodes, node_types.item_node, science_pack, "can research with", item_verbs.requires_specific_lab)
-        end
+        self:add_disjunctive_dependent(nodes, node_types.item_node, entity.inputs, "can research with", item_verbs.requires_specific_lab)
     end
 
     local fluid_boxes = entity.fluid_boxes or {}
@@ -122,7 +117,7 @@ local entity_node = object_node_base:create_object_class("entity", node_types.en
         self:add_disjunctive_dependent(nodes, node_types.entity_node, 1, "requires any rail-ramp prototype", entity_verbs.requires_rail_ramp)
     end
 
-    if is_nonelevated_rail[entity.type] then
+    if is_elevated_rail[entity.type] or is_nonelevated_rail[entity.type] then
         self:add_disjunctive_dependent(nodes, node_types.entity_node, 1, "requires any rail prototype", entity_verbs.requires_rail)
     elseif requires_rail_to_build[entity.type] then
         self:add_dependency(nodes, node_types.entity_node, 1, "requires any rail prototype", entity_verbs.requires_rail)
