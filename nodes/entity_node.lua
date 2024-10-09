@@ -27,6 +27,9 @@ local entity_node = object_node_base:create_object_class("entity", node_types.en
     self:add_disjunctive_dependent(nodes, node_types.item_node, entity.loot, "loot", item_verbs.create, "item")
     self:add_disjunctive_dependent(nodes, node_types.entity_node, entity.corpse, "corpse", entity_verbs.instantiate)
 
+    -- TODO: this code is problematic. What if a machine is unlocked after its module?
+    -- But then we also need to support the pY case of the machine requiring the module to function at all.
+    -- For now I have chosen to only support the pY case.
     for _, module_category in pairs(entity.allowed_module_categories or {}) do
         self:add_disjunctive_dependency(nodes, node_types.module_category_node, module_category, "allowed module category", module_category_verbs.requires)
     end
