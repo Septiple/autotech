@@ -18,8 +18,8 @@ local item_node = object_node_base:create_object_class("item", node_types.item_n
 
     for _, rocket_launch_product in pairs(item.rocket_launch_products or {}) do
         self:add_disjunctive_dependent(nodes, node_types.item_node, rocket_launch_product.name, "rocket launch product", item_verbs.create)
+        self:add_dependency(nodes, node_types.entity_node, 1, "requires any cargo-landing-pad prototype", entity_verbs.requires_cargo_landing_pad)
     end
-
 
     if item.type == "armor" then
         self:add_disjunctive_dependent(nodes, node_types.equipment_grid_node, item.equipment_grid, "equipment grid", equipment_grid_verbs.instantiate)
