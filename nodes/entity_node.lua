@@ -51,8 +51,26 @@ local entity_node = object_node_base:create_object_class("entity", node_types.en
     self:add_disjunctive_dependency(nodes, node_types.fuel_category_node, entity.burner, "requires fuel", entity_verbs.fuel, "fuel_category")
     self:add_disjunctive_dependent(nodes, node_types.recipe_category_node, entity.crafting_categories, "can craft", recipe_category_verbs.instantiate)
     --fluid_boxes
-    --allowed_effects, module_specification
-    --inputs (labs)
+
+    if entity.type == "lab" then
+        for _, science_pack in pairs(entity.inputs) do
+            self:add_disjunctive_dependent(nodes, node_types.item_node, science_pack, "can research with", item_verbs.requires_specific_lab)
+        end
+    end
+
+    local fluid_boxes = entity.fluid_boxes or {}
+    if entity.fluid_box then table.insert(fluid_boxes, entity.fluid_box) end
+    if entity.output_fluid_box then table.insert(fluid_boxes, entity.output_fluid_box) end
+
+    for _, fluid_box in pairs(fluid_boxes) do
+        if fluid_box.filter then
+            if fluid_box.production_type == 'input' then
+                self:add_dependency(nodes, node_types.fluid_node, fluid_box.filter, "requires fluid input", entity_verbs.required_fluid)
+            elseif fluid_box.production_type == 'output' then
+                self:add_disjunctive_dependent(nodes, node_types.fluid_node, fluid_box.filter, "produces fluid output", fluid_verbs.create)
+            end
+        end
+    end
 end)
 
 return entity_node

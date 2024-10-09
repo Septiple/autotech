@@ -1,5 +1,6 @@
 return {
     instantiate = "instantiate",
     fuel = "fuel",
-    plants = "plants"
+    plants = "plants",
+    required_fluid = "required fluid",
 }
