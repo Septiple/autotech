@@ -7,6 +7,30 @@ local item_verbs = require "verbs.item_verbs"
 local fluid_verbs = require "verbs.fluid_verbs"
 local electricity_verbs = require "verbs.electricity_verbs"
 
+local is_nonelevated_rail = {
+    ["curved-rail-a"] = true,
+    ["curved-rail-b"] = true,
+    ["half-diagonal-rail"] = true,
+    ["straight-rail"] = true,
+}
+
+local is_elevated_rail = {
+    ["elevated-curved-rail-a"] = true,
+    ["elevated-curved-rail-b"] = true,
+    ["elevated-half-diagonal-rail"] = true,
+    ["elevated-straight-rail"] = true,
+}
+
+local requires_rail_to_build = {
+    ["locomotive"] = true,
+    ["cargo-wagon"] = true,
+    ["fluid-wagon"] = true,
+    ["artillery-wagon"] = true,
+    ["rail-signal"] = true,
+    ["rail-chain-signal"] = true,
+    ["train-stop"] = true,
+}
+
 local entity_node = object_node_base:create_object_class("entity", node_types.entity_node, function(self, nodes)
     local entity = self.object
 
@@ -65,17 +89,17 @@ local entity_node = object_node_base:create_object_class("entity", node_types.en
     if entity.output_fluid_box then table.insert(fluid_boxes, entity.output_fluid_box) end
     for _, fluid_box in pairs(fluid_boxes) do
         if fluid_box.filter then
-            if fluid_box.production_type == 'input' then
+            if fluid_box.production_type == "input" then
                 self:add_dependency(nodes, node_types.fluid_node, fluid_box.filter, "requires fluid input", entity_verbs.required_fluid)
-            elseif fluid_box.production_type == 'output' then
+            elseif fluid_box.production_type == "output" then
                 self:add_disjunctive_dependent(nodes, node_types.fluid_node, fluid_box.filter, "produces fluid output", fluid_verbs.create)
             end
         end
     end
 
-    if entity.type == 'plant' then
+    if entity.type == "plant" then
         self:add_disjunctive_dependency(nodes, node_types.entity_node, 1, "requires any agri tower prototype", entity_verbs.requires_agri_tower)
-    elseif entity.type == 'agricultural-tower' then
+    elseif entity.type == "agricultural-tower" then
         self:add_disjunctive_dependent(nodes, node_types.entity_node, 1, "can grow", entity_verbs.requires_agri_tower)
     end
 
@@ -87,6 +111,21 @@ local entity_node = object_node_base:create_object_class("entity", node_types.en
 
     if entity.type == "cargo-pod" and entity.spawned_container then
         self:add_disjunctive_dependent(nodes, node_types.entity_node, entity.spawned_container, "spawned container", entity_verbs.instantiate)
+    end
+
+    if is_elevated_rail[entity.type] then
+        self:add_dependency(nodes, node_types.entity_node, 1, "requires any rail-support prototype", entity_verbs.requires_rail_supports)
+        self:add_dependency(nodes, node_types.entity_node, 1, "requires any rail-ramp prototype", entity_verbs.requires_rail_ramp)
+    elseif entity.type == "rail-support" then
+        self:add_disjunctive_dependent(nodes, node_types.entity_node, 1, "requires any rail-support prototype", entity_verbs.requires_rail_supports)
+    elseif entity.type == "rail-ramp" then
+        self:add_disjunctive_dependent(nodes, node_types.entity_node, 1, "requires any rail-ramp prototype", entity_verbs.requires_rail_ramp)
+    end
+
+    if is_nonelevated_rail[entity.type] then
+        self:add_disjunctive_dependent(nodes, node_types.entity_node, 1, "requires any rail prototype", entity_verbs.requires_rail)
+    elseif requires_rail_to_build[entity.type] then
+        self:add_dependency(nodes, node_types.entity_node, 1, "requires any rail prototype", entity_verbs.requires_rail)
     end
 end)
 

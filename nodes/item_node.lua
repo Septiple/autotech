@@ -44,6 +44,11 @@ local item_node = object_node_base:create_object_class("item", node_types.item_n
             self:add_disjunctive_dependent(nodes, node_types.item_node, inital_item.name, "initial item in the space platform starter pack", item_verbs.create)
         end
 
+    elseif item.type == "rail-planner" then
+        for _, rail in pairs(item.rails or {}) do
+            self:add_disjunctive_dependent(nodes, node_types.entity_node, rail, "rail", entity_verbs.instantiate)
+        end
+
     end
 end)
 
