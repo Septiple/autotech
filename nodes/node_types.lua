@@ -1,5 +1,5 @@
 ---@enum NodeType
-local nodeTypes = {
+local node_types = {
     ammo_category_node = 1,
     electricity_node = 2,
     entity_node = 3,
@@ -14,4 +14,4 @@ local nodeTypes = {
     start_node = 12,
     technology_node = 13,
 }
-return nodeTypes
+return node_types

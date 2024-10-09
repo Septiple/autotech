@@ -114,6 +114,8 @@ function auto_tech:create_nodes()
         process_type(self.data_raw[item_type], item_node)
     end
 
+    -- asteroid chunks are actually not entities however they define standard minable properties.
+    process_type(self.data_raw["asteroid-chunk"], entity_node)
     for _, entity_type in pairs(defines.prototypes.entity) do
         process_type(self.data_raw[entity_type], entity_node)
     end

@@ -58,6 +58,7 @@ Foreach ($file in Get-ChildItem ".\unfiltered_input") {
     
     # 2.0 prototypes
     $JsonFile.PSObject.Properties.Remove("airborne-pollutant")
+    $JsonFile.PSObject.Properties.Remove("burner-usage")
     $JsonFile.PSObject.Properties.Remove("chain-active-trigger")
     $JsonFile.PSObject.Properties.Remove("change-surface-achievement")
     $JsonFile.PSObject.Properties.Remove("complete-objective-achievement")
