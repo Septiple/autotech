@@ -76,10 +76,6 @@ local entity_node = object_node_base:create_object_class("entity", node_types.en
     self:add_disjunctive_dependency(nodes, node_types.fuel_category_node, entity.burner, "requires fuel", entity_verbs.fuel, "fuel_category")
     self:add_disjunctive_dependent(nodes, node_types.recipe_category_node, entity.crafting_categories, "can craft", recipe_category_verbs.instantiate)
 
-    if entity.type == "lab" then
-        self:add_disjunctive_dependent(nodes, node_types.item_node, entity.inputs, "can research with", item_verbs.requires_specific_lab)
-    end
-
     local fluid_boxes = entity.fluid_boxes or {}
     if entity.fluid_box then table.insert(fluid_boxes, entity.fluid_box) end
     if entity.output_fluid_box then table.insert(fluid_boxes, entity.output_fluid_box) end
@@ -91,6 +87,14 @@ local entity_node = object_node_base:create_object_class("entity", node_types.en
                 self:add_disjunctive_dependent(nodes, node_types.fluid_node, fluid_box.filter, "produces fluid output", fluid_verbs.create)
             end
         end
+    end
+
+    if entity.type == "reactor" then
+        self:add_disjunctive_dependent(nodes, node_types.electricity_node, 1, "requires heat", electricity_verbs.heat)
+    end
+
+    if entity.type == "lab" then
+        self:add_disjunctive_dependent(nodes, node_types.item_node, entity.inputs, "can research with", item_verbs.requires_specific_lab)
     end
 
     if entity.type == "plant" then
