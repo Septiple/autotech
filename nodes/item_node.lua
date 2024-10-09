@@ -14,7 +14,7 @@ local item_node = object_node_base:create_object_class("item", node_types.item_n
 
     self:add_disjunctive_dependent(nodes, node_types.item_node, item.burnt_result, "burnt result", item_verbs.create)
     self:add_disjunctive_dependent(nodes, node_types.item_node, item.spoil_result, "spoil result", item_verbs.create)
-    self:add_disjunctive_dependent(nodes, node_types.item_node, item.plant_result, "plant result", item_verbs.create)
+    self:add_disjunctive_dependent(nodes, node_types.entity_node, item.plant_result, "plant result", entity_verbs.plants)
 
     for _, rocket_launch_product in pairs(item.rocket_launch_products or {}) do
         self:add_disjunctive_dependent(nodes, node_types.item_node, rocket_launch_product.name, "rocket launch product", item_verbs.create)
@@ -37,7 +37,7 @@ local item_node = object_node_base:create_object_class("item", node_types.item_n
         end
 
     elseif item.type == "module" and item.category then
-        self:add_disjunctive_dependent(nodes, node_types.item_node, item.category, "module category", module_category_verbs.requires)
+        self:add_disjunctive_dependent(nodes, node_types.module_category_node, item.category, "module category", module_category_verbs.requires)
 
     elseif item.type == "space-platform-starter-pack" then
         for _, inital_item in pairs(item.initial_items or {}) do

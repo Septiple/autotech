@@ -26,6 +26,11 @@ local entity_node = object_node_base:create_object_class("entity", node_types.en
     self:add_disjunctive_dependency(nodes, node_types.item_node, entity.placeable_by, "placeable by", entity_verbs.instantiate, "item")
     self:add_disjunctive_dependent(nodes, node_types.item_node, entity.loot, "loot", item_verbs.create, "item")
     self:add_disjunctive_dependent(nodes, node_types.entity_node, entity.corpse, "corpse", entity_verbs.instantiate)
+
+    for _, module_category in pairs(entity.allowed_module_categories or {}) do
+        self:add_disjunctive_dependency(nodes, node_types.module_category_node, module_category, "allowed module category", module_category_verbs.requires)
+    end
+
     if entity.energy_usage then
         self:add_dependency(nodes, node_types.electricity_node, 1, "requires electricity", "power")
     end

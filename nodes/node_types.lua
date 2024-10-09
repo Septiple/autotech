@@ -13,5 +13,6 @@ local node_types = {
     resource_category_node = 11,
     start_node = 12,
     technology_node = 13,
+    module_category_node = 14,
 }
 return node_types
