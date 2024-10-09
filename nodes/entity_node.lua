@@ -67,6 +67,7 @@ local entity_node = object_node_base:create_object_class("entity", node_types.en
             self:add_disjunctive_dependency(nodes, node_types.fuel_category_node, energy_source.fuel_category, "requires fuel", entity_verbs.fuel)
             self:add_disjunctive_dependency(nodes, node_types.fuel_category_node, energy_source.fuel_categories, "requires fuel", entity_verbs.fuel)
         elseif type == "heat" then
+            self:add_dependency(nodes, node_types.electricity_node, 1, "requires a heat source", electricity_verbs.heat)
         elseif type == "fluid" then
         else
             assert(type == "void", "Unknown energy source type")
