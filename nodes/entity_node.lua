@@ -31,6 +31,15 @@ local requires_rail_to_build = {
     ["train-stop"] = true,
 }
 
+local is_energy_generator = {
+    "fusion-generator",
+    "solar-panel",
+    "burner-generator",
+    "generator",
+    "electric-energy-interface",
+    "lightning-attractor",
+}
+
 local entity_node = object_node_base:create_object_class("entity", node_types.entity_node, function(self, nodes)
     local entity = self.object
 
@@ -62,7 +71,11 @@ local entity_node = object_node_base:create_object_class("entity", node_types.en
         local energy_source = entity.energy_source
         local type = energy_source.type
         if type == "electric" then
-            self:add_disjunctive_dependent(nodes, node_types.electricity_node, 1, "generates electricity", electricity_verbs.generate)
+            if is_energy_generator[entity] then
+                self:add_disjunctive_dependent(nodes, node_types.electricity_node, 1, "generates electricity", electricity_verbs.generate)
+            else
+                self:add_dependency(nodes, node_types.electricity_node, 1, "requires electricity", electricity_verbs.generate)
+            end
         elseif type == "burner" then
             self:add_disjunctive_dependency(nodes, node_types.fuel_category_node, energy_source.fuel_category, "requires fuel", entity_verbs.fuel)
             self:add_disjunctive_dependency(nodes, node_types.fuel_category_node, energy_source.fuel_categories, "requires fuel", entity_verbs.fuel)
