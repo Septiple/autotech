@@ -4,6 +4,7 @@
 local node_types = require "nodes.node_types"
 local item_verbs = require "verbs.item_verbs"
 local fluid_verbs = require "verbs.fluid_verbs"
+local technology_verbs = require "verbs.technology_verbs"
 
 ---@class ObjectNodeBase
 ---@field node_type NodeType
@@ -253,15 +254,17 @@ function object_node:add_productlike_dependency_impl(nodes, single_product, tabl
 
     if table_product ~= nil then
         for _, result in pairs(table_product) do
-            local result_name = unwrap_result(result)
             if result.type == "fluid" then
+                local result_name = unwrap_result(result)
                 dependency_function(self, nodes, node_types.fluid_node, result_name, dependency_type, fluid_verbs.create)
+            elseif result.type == "research-progress" then
+                dependency_function(self, nodes, node_types.technology_node, result.research_item, dependency_type, technology_verbs.enable)
             else
+                local result_name = unwrap_result(result)
                 dependency_function(self, nodes, node_types.item_node, result_name, dependency_type, item_verbs.create)
             end
         end
-    end
-    if single_product ~= nil then
+    elseif single_product ~= nil then
         local result_name = unwrap_result(single_product)
         dependency_function(self, nodes, node_types.item_node, result_name, dependency_type, item_verbs.create)
     end
