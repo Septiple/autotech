@@ -50,11 +50,13 @@ local entity_node = object_node_base:create_object_class("entity", node_types.en
     elseif entity.type == "offshore-pump" then
         self:add_disjunctive_dependent(nodes, node_types.fluid_node, entity.fluid, "pumps", fluid_verbs.create)
     end
+
     local minable = entity.minable
     if minable ~= nil then
         self:add_dependency(nodes, node_types.fluid_node, minable.required_fluid, "required fluid", "mine")
         self:add_productlike_disjunctive_dependent(nodes, minable.result, minable.results, "mining result")
     end
+
     self:add_disjunctive_dependent(nodes, node_types.entity_node, entity.remains_when_mined, "remains when mined", entity_verbs.instantiate)
     self:add_disjunctive_dependency(nodes, node_types.item_node, entity.placeable_by, "placeable by", entity_verbs.instantiate, "item")
     self:add_disjunctive_dependent(nodes, node_types.item_node, entity.loot, "loot", item_verbs.create, "item")
@@ -86,7 +88,12 @@ local entity_node = object_node_base:create_object_class("entity", node_types.en
             assert(type == "void", "Unknown energy source type")
         end
     end
-    self:add_disjunctive_dependency(nodes, node_types.fuel_category_node, entity.burner, "requires fuel", entity_verbs.fuel, "fuel_category")
+
+    if entity.burner then
+        for _, fuel_category in pairs(entity.burner.fuel_categories or {}) do
+            self:add_disjunctive_dependency(nodes, node_types.fuel_category_node, fuel_category, "requires fuel", entity_verbs.fuel)
+        end
+    end
     self:add_disjunctive_dependent(nodes, node_types.recipe_category_node, entity.crafting_categories, "can craft", recipe_category_verbs.instantiate)
 
     local fluid_boxes = entity.fluid_boxes or {}

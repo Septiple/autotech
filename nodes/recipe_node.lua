@@ -6,11 +6,11 @@ local recipe_node = object_node_base:create_object_class("recipe", node_types.re
     local recipe = self.object
     self:add_dependency(nodes, node_types.recipe_category_node, recipe.category or "crafting", "crafting category", "craft")
 
-    self:add_productlike_dependency(nodes, recipe_data.ingredient, recipe_data.ingredients, "ingredient", "craft")
+    self:add_productlike_dependency(nodes, recipe.ingredient, recipe.ingredients, "ingredient", "craft")
 
-    self:add_productlike_disjunctive_dependent(nodes, recipe_data.result, recipe_data.results, "result")
+    self:add_productlike_disjunctive_dependent(nodes, recipe.result, recipe.results, "result")
 
-    if recipe_data.enabled ~= false then
+    if recipe.enabled ~= false then
         self:add_disjunctive_dependency(nodes, node_types.start_node, 1, "starts enabled", recipe_verbs.enable)
     end
 end)

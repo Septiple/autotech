@@ -147,12 +147,22 @@ end
 function object_node:lookup_dependency(nodes, node_type, node_name)
     local dependency = nodes[node_type][node_name]
     if dependency == nil then
-        error("Could not find dependency " .. node_name .. " of type " .. node_type.type_name .. ", this is probably a bug in the data parser.")
+        local node_type_name = "unknown node type"
+        for k, v in pairs(node_types) do
+            if v == node_type then
+                node_type_name = k
+            end
+        end
+        error("Could not find dependency " .. node_name .. " of type " .. node_type_name .. ", this is probably a bug in the data parser.")
     end
     return dependency
 end
 
 function object_node:add_dependency_impl(dependency, dependency_type, verb)
+    if not verb then
+        error("No verb provided for dependency " .. dependency.printable_name .. ": " .. dependency_type)
+    end
+
     local depends = self.depends
     depends[#depends+1] = {dependency, dependency_type}
     self.depends_count = self.depends_count + 1
@@ -164,6 +174,10 @@ function object_node:add_dependency_impl(dependency, dependency_type, verb)
 end
 
 function object_node:add_disjunctive_dependency_impl(dependency, dependency_type, verb)
+    if not verb then
+        error("No verb provided for disjunctive dependency " .. dependency.printable_name .. ": " .. dependency_type)
+    end
+
     if self.disjunctive_depends[verb] == nil then
         self.disjunctive_depends[verb] = {}
         self.disjunctive_depends_count = self.disjunctive_depends_count + 1
@@ -247,11 +261,10 @@ function object_node:add_productlike_disjunctive_dependent(nodes, single_product
     self:add_productlike_dependency_impl(nodes, single_product, table_product, dependency_type, self.add_disjunctive_dependent)
 end
 
+local function unwrap_result(wrapped_result)
+    return type(wrapped_result) == "table" and (wrapped_result.name or wrapped_result[1]) or wrapped_result
+end
 function object_node:add_productlike_dependency_impl(nodes, single_product, table_product, dependency_type, dependency_function)
-    local function unwrap_result(wrapped_result)
-        return type(wrapped_result) == "table" and (wrapped_result.name or wrapped_result[1]) or wrapped_result
-    end
-
     if table_product ~= nil then
         for _, result in pairs(table_product) do
             if result.type == "fluid" then

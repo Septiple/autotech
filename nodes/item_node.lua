@@ -5,6 +5,7 @@ local item_verbs = require "verbs.item_verbs"
 local fuel_category_verbs = require "verbs.fuel_category_verbs"
 local equipment_grid_verbs = require "verbs.equipment_grid_verbs"
 local module_category_verbs = require "verbs.module_category_verbs"
+local ammo_category_verbs = require "verbs.ammo_category_verbs"
 
 local item_node = object_node_base:create_object_class("item", node_types.item_node, function(self, nodes)
     local item = self.object

@@ -2,7 +2,6 @@
 
 local defines = require "utils.defines"
 local deque = require "utils.deque"
-local entity_prototypes = require "entity_prototypes"
 
 local node_types = require "nodes.node_types"
 
@@ -19,11 +18,12 @@ local recipe_node = require "nodes.recipe_node"
 local resource_category_node = require "nodes.resource_category_node"
 local start_node = require "nodes.start_node"
 local technology_node = require "nodes.technology_node"
+local planet_node = require "nodes.planet_node"
+local module_category_node = require "nodes.module_category_node"
 
 --- @class auto_tech
 --- @field private configuration Configuration
 --- @field private data_raw DataRaw
---- @field private entity_prototypes { [string]:0 }
 --- @field private nodes_per_node_type table<NodeType, ObjectNodeBase>
 local auto_tech = {}
 auto_tech.__index = auto_tech
@@ -37,7 +37,6 @@ function auto_tech.create(data_raw, configuration)
 
     a.nodes_per_node_type = {}
     a.data_raw = data_raw
-    a.entity_prototypes = entity_prototypes
     a.configuration = configuration
     return a
 end
@@ -96,6 +95,9 @@ function auto_tech:create_nodes()
     ---@param table FactorioThingGroup
     ---@param node_type ObjectNodeBase
     local function process_type(table, node_type)
+        -- this is a sentinel value for a dependency on *any* existance of a certian prototype. for example seeds require any agri tower prototype
+        node_type:create(nil, self.nodes_per_node_type, self.configuration)
+
         for _, object in pairs(table or {}) do
             node_type:create(object, self.nodes_per_node_type, self.configuration)
         end
@@ -109,28 +111,48 @@ function auto_tech:create_nodes()
     process_type(self.data_raw["recipe"], recipe_node)
     process_type(self.data_raw["resource-category"], resource_category_node)
     process_type(self.data_raw["technology"], technology_node)
+    process_type(self.data_raw["planet"], planet_node)
 
-    for _, item_type in pairs(defines.prototypes.item) do
+    for item_type in pairs(defines.prototypes.item) do
         process_type(self.data_raw[item_type], item_node)
+    end
+
+    local module_categories = {}
+    for _, module in pairs(self.data_raw.module) do
+        module_categories[module.category] = true
     end
 
     -- asteroid chunks are actually not entities however they define standard minable properties.
     process_type(self.data_raw["asteroid-chunk"], entity_node)
-    for _, entity_type in pairs(defines.prototypes.entity) do
+    for entity_type in pairs(defines.prototypes.entity) do
         process_type(self.data_raw[entity_type], entity_node)
-    end
 
-    for entity_name, _ in pairs(self.entity_prototypes) do
-        for _, value in pairs(self.data_raw[entity_name] or {}) do
-            entity_node:create(value, self.nodes_per_node_type, self.configuration)
+        for _, entity in pairs(self.data_raw[entity_type] or {}) do
+            if entity.allowed_module_categories then
+                for _, category in pairs(entity.allowed_module_categories) do
+                    module_categories[category] = true
+                end
+            end
         end
     end
-end
+
+    local _module_categories = {}
+    for category in pairs(module_categories) do -- module categories are not a real prototype. we can need to fake it by giving them a name and type.
+        table.insert(_module_categories, {
+            name = category,
+            type = "module-category",
+        })
+    end
+
+    process_type(_module_categories, module_category_node)
+end 
 
 function auto_tech:link_nodes()
     for _, node_type in pairs(self.nodes_per_node_type) do
         for _, node in pairs(node_type) do
-            node:register_dependencies(self.nodes_per_node_type)
+            if node.object then
+                node:register_dependencies(self.nodes_per_node_type)
+            end
         end
     end
 end

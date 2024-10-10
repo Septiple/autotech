@@ -8,4 +8,5 @@ return {
     requires_rail_supports = "is supported by",
     requires_rail_ramp = "is ramped by",
     requires_rail = "is placed on",
+    autoplace = "autoplace",
 }

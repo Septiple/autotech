@@ -4,6 +4,7 @@ local item_verbs = require "verbs.item_verbs"
 local recipe_verbs = require "verbs.recipe_verbs"
 local planet_verbs = require "verbs.planet_verbs"
 local technology_verbs = require "verbs.technology_verbs"
+local entity_verbs = require "verbs.entity_verbs"
 
 local technology_node = object_node_base:create_object_class("technology", node_types.technology_node, function(self, nodes)
     local tech = self.object
@@ -21,7 +22,9 @@ local technology_node = object_node_base:create_object_class("technology", node_
     end
 
     if tech.unit then
-        self:add_dependency(nodes, node_types.item_node, tech.unit.ingredients, "required science pack", technology_verbs.researched_with)
+        for _, ingredient in pairs(tech.unit.ingredients or {}) do
+            self:add_dependency(nodes, node_types.item_node, ingredient[1], "required science pack", technology_verbs.researched_with)
+        end
     elseif tech.research_trigger then
         local trigger = tech.research_trigger
         if trigger.type == "mine-entity" or trigger.type == "build-entity" then
