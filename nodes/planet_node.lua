@@ -25,6 +25,12 @@ local planet_node = object_node_base:create_object_class("planet", node_types.pl
         self:add_disjunctive_dependent(nodes, node_types.entity_node, mgs.territory_settings.units, "planet territory owner", entity_verbs.autoplace)
     end
 
+    if mgs.autoplace_controls then
+        for control in pairs(mgs.autoplace_controls) do
+            self:add_disjunctive_dependent(nodes, node_types.autoplace_control_node, control, "autoplace control", "configure")
+        end
+    end
+
     local autoplace_settings = mgs.autoplace_settings
     if not autoplace_settings then return end
 

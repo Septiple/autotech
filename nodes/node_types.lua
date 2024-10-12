@@ -15,5 +15,6 @@ local node_types = {
     technology_node = 13,
     module_category_node = 14,
     planet_node = 15,
+    autoplace_control_node = 16,
 }
 return node_types

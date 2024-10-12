@@ -95,6 +95,10 @@ function object_node:print_dependencies()
                 result = result .. verb .. ", "
             end
         end
+        -- trim last ", "
+        if result:sub(-2) == ", " then
+            result = result:sub(1, -3)
+        end
     end
 
     return result

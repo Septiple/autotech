@@ -147,6 +147,10 @@ local entity_node = object_node_base:create_object_class("entity", node_types.en
     elseif requires_rail_to_build[entity.type] then
         self:add_dependency(nodes, node_types.entity_node, 1, "requires any rail prototype", entity_verbs.requires_rail)
     end
+
+    if entity.autoplace and entity.autoplace.control then
+        self:add_disjunctive_dependency(nodes, node_types.autoplace_control_node, entity.autoplace.control, "autoplace control", entity_verbs.autoplace)
+    end
 end)
 
 return entity_node
