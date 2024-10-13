@@ -87,9 +87,7 @@ local entity_node = object_node_base:create_object_class("entity", node_types.en
     end
 
     if entity.burner then
-        for _, fuel_category in pairs(entity.burner.fuel_categories or {}) do
-            self:add_disjunctive_dependency(nodes, node_types.fuel_category_node, fuel_category, "requires fuel", entity_verbs.fuel)
-        end
+        self:add_disjunctive_dependency(nodes, node_types.fuel_category_node, entity.burner.fuel_categories, "requires fuel", entity_verbs.fuel)
     end
     self:add_disjunctive_dependent(nodes, node_types.recipe_category_node, entity.crafting_categories, "can craft", recipe_category_verbs.instantiate)
 
@@ -126,7 +124,7 @@ local entity_node = object_node_base:create_object_class("entity", node_types.en
         self:add_disjunctive_dependent(nodes, node_types.entity_node, 1, "can land rockets on", entity_verbs.requires_cargo_landing_pad)
     end
 
-    if entity.type == "cargo-pod" and entity.spawned_container then
+    if entity.type == "cargo-pod" then
         self:add_disjunctive_dependent(nodes, node_types.entity_node, entity.spawned_container, "spawned container", entity_verbs.instantiate)
     end
 
@@ -145,7 +143,7 @@ local entity_node = object_node_base:create_object_class("entity", node_types.en
         self:add_dependency(nodes, node_types.entity_node, 1, "requires any rail prototype", entity_verbs.requires_rail)
     end
 
-    if entity.autoplace and entity.autoplace.control then
+    if entity.autoplace then
         self:add_disjunctive_dependency(nodes, node_types.autoplace_control_node, entity.autoplace.control, "autoplace control", "configure")
     end
 end)

@@ -18,8 +18,8 @@ local item_node = object_node_base:create_object_class("item", node_types.item_n
     self:add_disjunctive_dependent(nodes, node_types.item_node, item.spoil_result, "spoil result", item_verbs.create)
     self:add_disjunctive_dependent(nodes, node_types.entity_node, item.plant_result, "plant result", entity_verbs.plants)
 
-    for _, rocket_launch_product in pairs(item.rocket_launch_products or {}) do
-        self:add_disjunctive_dependent(nodes, node_types.item_node, rocket_launch_product.name, "rocket launch product", item_verbs.create)
+    self:add_disjunctive_dependent(nodes, node_types.item_node, item.rocket_launch_products, "rocket launch product", item_verbs.create, "name")
+    if item.rocket_launch_products then
         self:add_dependency(nodes, node_types.entity_node, 1, "requires any cargo-landing-pad prototype", entity_verbs.requires_cargo_landing_pad)
     end
 
@@ -30,10 +30,9 @@ local item_node = object_node_base:create_object_class("item", node_types.item_n
         self:add_disjunctive_dependent(nodes, node_types.ammo_category_node, item.ammo_category, "ammo category", ammo_category_verbs.fires)
         
     elseif item.type == "gun" and item.attack_parameters then
-        local ammo_categories = item.attack_parameters.ammo_categories or {item.attack_parameters.ammo_category}
-        self:add_dependency(nodes, node_types.ammo_category_node, ammo_categories, "ammo category", ammo_category_verbs.fires)
+        self:add_dependency(nodes, node_types.ammo_category_node, item.attack_parameters.ammo_categories or item.attack_parameters.ammo_category, "ammo category", ammo_category_verbs.fires)
 
-    elseif item.type == "module" and item.category then
+    elseif item.type == "module" then
         self:add_disjunctive_dependent(nodes, node_types.module_category_node, item.category, "module category", module_category_verbs.requires)
 
     elseif item.type == "space-platform-starter-pack" then
@@ -43,7 +42,7 @@ local item_node = object_node_base:create_object_class("item", node_types.item_n
         self:add_disjunctive_dependent(nodes, node_types.entity_node, item.rails, "rail", entity_verbs.instantiate)
     end
 
-    if item.place_as_tile and item.place_as_tile.result then
+    if item.place_as_tile then
         self:add_disjunctive_dependent(nodes, node_types.tile_node, item.place_as_tile.result, "place as tile result", tile_verbs.place)
     end
 

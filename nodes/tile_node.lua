@@ -15,11 +15,8 @@ local tile_node = object_node_base:create_object_class("tile", node_types.tile_n
         self:add_productlike_disjunctive_dependent(nodes, minable.result, minable.results, item_verbs.create)
     end
 
-    if tile.frozen_variant and defines.feature_flags.freezing then
+    if defines.feature_flags.freezing then
         self:add_disjunctive_dependent(nodes, node_types.tile_node, tile.frozen_variant, "freezing", tile_verbs.place)
-    end
-
-    if tile.thawed_variant and defines.feature_flags.freezing then
         self:add_disjunctive_dependent(nodes, node_types.tile_node, tile.thawed_variant, "thawing", tile_verbs.place)
     end
 end)
