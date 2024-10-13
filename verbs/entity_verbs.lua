@@ -1,7 +1,6 @@
 return {
     instantiate = "instantiate",
     fuel = "fuel",
-    plants = "plants",
     required_fluid = "supply fluid to",
     requires_agri_tower = "grow",
     requires_cargo_landing_pad = "land on with cargo for",
