@@ -14,11 +14,11 @@ local planet_node = object_node_base:create_object_class("planet", node_types.pl
     if not mgs then return end
 
     if mgs.cliff_settings then
-        self:add_disjunctive_dependent(nodes, node_types.entity_node, mgs.cliff_settings.name, "cliff autoplace", entity_verbs.autoplace)
+        self:add_disjunctive_dependent(nodes, node_types.entity_node, mgs.cliff_settings.name, "cliff autoplace", entity_verbs.instantiate)
     end
 
     if mgs.territory_settings then
-        self:add_disjunctive_dependent(nodes, node_types.entity_node, mgs.territory_settings.units, "planet territory owner", entity_verbs.autoplace)
+        self:add_disjunctive_dependent(nodes, node_types.entity_node, mgs.territory_settings.units, "planet territory owner", entity_verbs.instantiate)
     end
 
     if mgs.autoplace_controls then
@@ -32,7 +32,7 @@ local planet_node = object_node_base:create_object_class("planet", node_types.pl
 
     if autoplace_settings.entity then
         for k, _ in pairs(autoplace_settings.entity.settings or {}) do
-            self:add_disjunctive_dependent(nodes, node_types.entity_node, k, "autoplace entity", entity_verbs.autoplace)
+            self:add_disjunctive_dependent(nodes, node_types.entity_node, k, "autoplace entity", entity_verbs.instantiate)
         end
     end
 end)
