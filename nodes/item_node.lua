@@ -6,6 +6,7 @@ local fuel_category_verbs = require "verbs.fuel_category_verbs"
 local equipment_grid_verbs = require "verbs.equipment_grid_verbs"
 local module_category_verbs = require "verbs.module_category_verbs"
 local ammo_category_verbs = require "verbs.ammo_category_verbs"
+local tile_verbs = require "verbs.tile_verbs"
 
 local item_node = object_node_base:create_object_class("item", node_types.item_node, function(self, nodes)
     local item = self.object
@@ -40,6 +41,10 @@ local item_node = object_node_base:create_object_class("item", node_types.item_n
 
     elseif item.type == "rail-planner" then
         self:add_disjunctive_dependent(nodes, node_types.entity_node, item.rails, "rail", entity_verbs.instantiate)
+    end
+
+    if item.place_as_tile and item.place_as_tile.result then
+        self:add_disjunctive_dependent(nodes, node_types.tile_node, item.place_as_tile.result, "place as tile result", tile_verbs.place)
     end
 
     --placed_as_equipment_result optional 	:: EquipmentID

@@ -16,5 +16,6 @@ local node_types = {
     module_category_node = 14,
     planet_node = 15,
     autoplace_control_node = 16,
+    tile_node = 17,
 }
 return node_types

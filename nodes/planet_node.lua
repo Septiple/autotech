@@ -2,6 +2,7 @@ local object_node_base = require "nodes.object_node_base"
 local node_types = require "nodes.node_types"
 local electricity_verbs = require "verbs.electricity_verbs"
 local entity_verbs = require "verbs.entity_verbs"
+local tile_verbs = require "verbs.tile_verbs"
 
 local planet_node = object_node_base:create_object_class("planet", node_types.planet_node, function(self, nodes)
     local planet = self.object
@@ -33,6 +34,12 @@ local planet_node = object_node_base:create_object_class("planet", node_types.pl
     if autoplace_settings.entity then
         for k, _ in pairs(autoplace_settings.entity.settings or {}) do
             self:add_disjunctive_dependent(nodes, node_types.entity_node, k, "autoplace entity", entity_verbs.instantiate)
+        end
+    end
+
+    if autoplace_settings.tile then
+        for k, _ in pairs(autoplace_settings.tile.settings or {}) do
+            self:add_disjunctive_dependent(nodes, node_types.tile_node, k, "autoplace tile", tile_verbs.place)
         end
     end
 end)

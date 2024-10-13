@@ -20,6 +20,7 @@ local technology_node = require "nodes.technology_node"
 local planet_node = require "nodes.planet_node"
 local module_category_node = require "nodes.module_category_node"
 local autoplace_control_node = require "nodes.autoplace_control_node"
+local tile_node = require "nodes.tile_node"
 
 --- @class auto_tech
 --- @field private configuration Configuration
@@ -110,6 +111,7 @@ function auto_tech:create_nodes()
     process_type(data.raw["technology"], technology_node)
     process_type(data.raw["planet"], planet_node)
     process_type(data.raw["autoplace-control"], autoplace_control_node)
+    process_type(data.raw["tile"], tile_node)
 
     for item_type in pairs(defines.prototypes.item) do
         process_type(data.raw[item_type], item_node)
