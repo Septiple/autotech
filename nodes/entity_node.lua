@@ -72,7 +72,7 @@ local entity_node = object_node_base:create_object_class("entity", node_types.en
         if type == "electric" then
             if is_energy_generator[entity.type] then
                 self:add_disjunctive_dependent(nodes, node_types.electricity_node, 1, "generates electricity", electricity_verbs.generate)
-            elseif entity.type ~= "accumulator" then
+            else
                 self:add_dependency(nodes, node_types.electricity_node, 1, "requires energy", entity_verbs.power)
             end
         elseif type == "burner" then
