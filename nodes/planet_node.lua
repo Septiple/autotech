@@ -6,10 +6,6 @@ local entity_verbs = require "verbs.entity_verbs"
 local planet_node = object_node_base:create_object_class("planet", node_types.planet_node, function(self, nodes)
     local planet = self.object
 
-    if planet.autotech_is_starting_planet then
-        self:add_dependency(nodes, node_types.start_node, 1, "is the starting planet")
-    end
-
     if planet.entities_require_heating and defines.feature_flags.freezing then
         self:add_dependency(nodes, node_types.electricity_node, 1, "requires a heat source", electricity_verbs.heat)
     end

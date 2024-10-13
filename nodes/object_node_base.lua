@@ -178,6 +178,11 @@ function object_node:lookup_dependency(nodes, node_type, node_name)
 end
 
 function object_node:add_dependency_impl(dependency, dependency_type, verb)
+    if self.object and self.object.autotech_always_available then
+        log("Skipping dependency " .. dependency.printable_name .. " for " .. self.printable_name .. " as it is always available.")
+        return
+    end
+
     if not verb then
         error("No verb provided for dependency " .. dependency.printable_name .. ": " .. dependency_type)
     end
@@ -193,6 +198,11 @@ function object_node:add_dependency_impl(dependency, dependency_type, verb)
 end
 
 function object_node:add_disjunctive_dependency_impl(dependency, dependency_type, verb)
+    if self.object and self.object.autotech_always_available then
+        log("Skipping dependency " .. dependency.printable_name .. " for " .. self.printable_name .. " as it is always available.")
+        return
+    end
+
     if not verb then
         error("No verb provided for disjunctive dependency " .. dependency.printable_name .. ": " .. dependency_type)
     end

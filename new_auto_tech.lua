@@ -1,6 +1,5 @@
 --- @module "factorio_meta"
 
-local defines = require "utils.defines"
 local deque = require "utils.deque"
 
 local node_types = require "nodes.node_types"
@@ -24,20 +23,17 @@ local autoplace_control_node = require "nodes.autoplace_control_node"
 
 --- @class auto_tech
 --- @field private configuration Configuration
---- @field private data_raw DataRaw
 --- @field private nodes_per_node_type table<NodeType, ObjectNodeBase>
 local auto_tech = {}
 auto_tech.__index = auto_tech
 
----@param data_raw DataRaw
 ---@param configuration Configuration
 ---@return auto_tech
-function auto_tech.create(data_raw, configuration)
+function auto_tech.create(configuration)
     local a = {}
     setmetatable(a, auto_tech)
 
     a.nodes_per_node_type = {}
-    a.data_raw = data_raw
     a.configuration = configuration
     return a
 end
@@ -104,32 +100,32 @@ function auto_tech:create_nodes()
         end
     end
 
-    process_type(self.data_raw["ammo-category"], ammo_category_node)
-    process_type(self.data_raw["equipment-grid"], equipment_grid_node)
-    process_type(self.data_raw["fluid"], fluid_node)
-    process_type(self.data_raw["fuel-category"], fuel_category_node)
-    process_type(self.data_raw["recipe-category"], recipe_category_node)
-    process_type(self.data_raw["recipe"], recipe_node)
-    process_type(self.data_raw["resource-category"], resource_category_node)
-    process_type(self.data_raw["technology"], technology_node)
-    process_type(self.data_raw["planet"], planet_node)
-    process_type(self.data_raw["autoplace-control"], autoplace_control_node)
+    process_type(data.raw["ammo-category"], ammo_category_node)
+    process_type(data.raw["equipment-grid"], equipment_grid_node)
+    process_type(data.raw["fluid"], fluid_node)
+    process_type(data.raw["fuel-category"], fuel_category_node)
+    process_type(data.raw["recipe-category"], recipe_category_node)
+    process_type(data.raw["recipe"], recipe_node)
+    process_type(data.raw["resource-category"], resource_category_node)
+    process_type(data.raw["technology"], technology_node)
+    process_type(data.raw["planet"], planet_node)
+    process_type(data.raw["autoplace-control"], autoplace_control_node)
 
     for item_type in pairs(defines.prototypes.item) do
-        process_type(self.data_raw[item_type], item_node)
+        process_type(data.raw[item_type], item_node)
     end
 
     local module_categories = {}
-    for _, module in pairs(self.data_raw.module) do
+    for _, module in pairs(data.raw.module) do
         module_categories[module.category] = true
     end
 
     -- asteroid chunks are actually not entities however they define standard minable properties.
-    process_type(self.data_raw["asteroid-chunk"], entity_node)
+    process_type(data.raw["asteroid-chunk"], entity_node)
     for entity_type in pairs(defines.prototypes.entity) do
-        process_type(self.data_raw[entity_type], entity_node)
+        process_type(data.raw[entity_type], entity_node)
 
-        for _, entity in pairs(self.data_raw[entity_type] or {}) do
+        for _, entity in pairs(data.raw[entity_type] or {}) do
             if entity.allowed_module_categories then
                 for _, category in pairs(entity.allowed_module_categories) do
                     module_categories[category] = true
@@ -147,7 +143,7 @@ function auto_tech:create_nodes()
     end
 
     process_type(_module_categories, module_category_node)
-end 
+end
 
 function auto_tech:link_nodes()
     for _, node_type in pairs(self.nodes_per_node_type) do
@@ -167,7 +163,7 @@ function auto_tech:linearise_recipe_graph()
             if node:has_no_more_dependencies() then
                 q:push_right(node)
                 if verbose_logging then
-                   log("Node " .. node.printable_name .. " starts with no dependencies.") 
+                    log("Node " .. node.printable_name .. " starts with no dependencies.")
                 end
             end
         end
@@ -176,14 +172,14 @@ function auto_tech:linearise_recipe_graph()
     while not q:is_empty() do
         local next = q:pop_left()
         if verbose_logging then
-           log("Node " .. next.printable_name .. " is next in the linearisation.") 
+            log("Node " .. next.printable_name .. " is next in the linearisation.")
         end
 
         local newly_independent_nodes = next:release_dependents()
         if verbose_logging then
             for _, node in pairs(newly_independent_nodes) do
                 log("After releasing " .. next.printable_name .. " node " .. node.printable_name .. " is now independent.")
-            end    
+            end
         end
 
         for _, node in pairs(newly_independent_nodes) do
@@ -194,34 +190,34 @@ function auto_tech:linearise_recipe_graph()
     for _, node_type in pairs(self.nodes_per_node_type) do
         for _, node in pairs(node_type) do
             if not node:has_no_more_dependencies() then
-                log("Node " .. node.printable_name .. " still has unresolved dependencies: " .. node:print_dependencies()) 
+                log("Node " .. node.printable_name .. " still has unresolved dependencies: " .. node:print_dependencies())
             end
         end
     end
 end
 
 function auto_tech:verify_end_tech_reachable()
-    
+
 end
 
 function auto_tech:calculate_transitive_reduction()
-    
+
 end
 
 function auto_tech:construct_tech_graph()
-    
+
 end
 
 function auto_tech:linearise_tech_graph()
-    
+
 end
 
 function auto_tech:adapt_tech_links()
-    
+
 end
 
 function auto_tech:set_tech_costs()
-    
+
 end
 
 return auto_tech
