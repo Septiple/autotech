@@ -180,6 +180,12 @@ function auto_tech:linearise_recipe_graph()
         end
 
         local newly_independent_nodes = next:release_dependents()
+        if verbose_logging then
+            for _, node in pairs(newly_independent_nodes) do
+                log("After releasing " .. next.printable_name .. " node " .. node.printable_name .. " is now independent.")
+            end    
+        end
+
         for _, node in pairs(newly_independent_nodes) do
             q:push_right(node)
         end

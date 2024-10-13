@@ -54,7 +54,7 @@ local entity_node = object_node_base:create_object_class("entity", node_types.en
     local minable = entity.minable
     if minable ~= nil then
         self:add_dependency(nodes, node_types.fluid_node, minable.required_fluid, "required fluid", "mine")
-        self:add_productlike_disjunctive_dependent(nodes, minable.result, minable.results, "mining result")
+        self:add_productlike_disjunctive_dependent(nodes, minable.result, minable.results, item_verbs.create)
     end
 
     self:add_disjunctive_dependent(nodes, node_types.entity_node, entity.remains_when_mined, "remains when mined", entity_verbs.instantiate)
@@ -149,7 +149,7 @@ local entity_node = object_node_base:create_object_class("entity", node_types.en
     end
 
     if entity.autoplace and entity.autoplace.control then
-        self:add_disjunctive_dependency(nodes, node_types.autoplace_control_node, entity.autoplace.control, "autoplace control", entity_verbs.autoplace)
+        self:add_disjunctive_dependency(nodes, node_types.autoplace_control_node, entity.autoplace.control, "autoplace control", "configure")
     end
 end)
 

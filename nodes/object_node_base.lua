@@ -129,14 +129,14 @@ function object_node:release_dependents()
         local node = data[1]
         local verb = data[2]
         local dependency_type = data[3]
-        if node.canonicalised_choices[verb] ~= nil then
+        if not node.canonicalised_choices[verb] then
             node.canonicalised_choices[verb] = {self, dependency_type}
             node.canonicalised_choices_count = node.canonicalised_choices_count + 1
             if verbose_logging then
                 log("Canonising the dependency for " .. node.printable_name .. " for " .. verb .. " to be on " .. self.printable_name .. " via " .. dependency_type)
             end
     
-            if not node:still_has_dependencies() then
+            if node:has_no_more_dependencies() then
                 newly_independent_nodes[#newly_independent_nodes+1] = node
                 if verbose_logging then
                     log("Node " .. node.printable_name .. " has no more dependencies.")
