@@ -86,7 +86,22 @@ function object_node:has_no_more_dependencies()
 end
 
 function object_node:print_dependencies()
-    local result = self.depends_count .. " fixed dependencies"
+    local result
+
+    if self.depends_count ~= 0 then
+        local fixed_dependency_names = ""
+        for _, data in pairs(self.depends) do
+            fixed_dependency_names = fixed_dependency_names .. data[1].printable_name .. ", "
+        end
+        -- trim last ", "
+        if fixed_dependency_names:sub(-2) == ", " then
+            fixed_dependency_names = fixed_dependency_names:sub(1, -3)
+        end
+
+        result = self.depends_count .. " fixed dependencies on " .. fixed_dependency_names
+    else
+        result = "no fixed dependencies"
+    end
 
     if self.disjunctive_depends_count ~= self.canonicalised_choices_count then
         result = result .. " and these disjunctive dependencies: "
