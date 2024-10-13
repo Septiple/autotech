@@ -66,9 +66,6 @@ local entity_node = object_node_base:create_object_class("entity", node_types.en
         self:add_disjunctive_dependency(nodes, node_types.module_category_node, entity.allowed_module_categories, "allowed module category", module_category_verbs.requires)
     end
 
-    if entity.energy_usage then
-        self:add_dependency(nodes, node_types.electricity_node, 1, "requires electricity", "power")
-    end
     if entity.energy_source then
         local energy_source = entity.energy_source
         local type = energy_source.type
