@@ -8,4 +8,6 @@ return {
     requires_rail_supports = "have rail support",
     requires_rail_ramp = "have rail ramps",
     requires_rail = "place on",
+    power = "power",
+    heat = "heat",
 }

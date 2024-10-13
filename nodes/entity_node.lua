@@ -32,12 +32,12 @@ local requires_rail_to_build = {
 }
 
 local is_energy_generator = {
-    "fusion-generator",
-    "solar-panel",
-    "burner-generator",
-    "generator",
-    "electric-energy-interface",
-    "lightning-attractor",
+    ["fusion-generator"] = true,
+    ["solar-panel"] = true,
+    ["burner-generator"] = true,
+    ["generator"] = true,
+    ["electric-energy-interface"] = true,
+    ["lightning-attractor"] = true,
 }
 
 local entity_node = object_node_base:create_object_class("entity", node_types.entity_node, function(self, nodes)
@@ -70,16 +70,16 @@ local entity_node = object_node_base:create_object_class("entity", node_types.en
         local energy_source = entity.energy_source
         local type = energy_source.type
         if type == "electric" then
-            if is_energy_generator[entity] then
+            if is_energy_generator[entity.type] then
                 self:add_disjunctive_dependent(nodes, node_types.electricity_node, 1, "generates electricity", electricity_verbs.generate)
             elseif entity.type ~= "accumulator" then
-                self:add_dependency(nodes, node_types.electricity_node, 1, "requires electricity", electricity_verbs.generate)
+                self:add_dependency(nodes, node_types.electricity_node, 1, "requires energy", entity_verbs.power)
             end
         elseif type == "burner" then
             self:add_disjunctive_dependency(nodes, node_types.fuel_category_node, energy_source.fuel_category, "requires fuel", entity_verbs.fuel)
             self:add_disjunctive_dependency(nodes, node_types.fuel_category_node, energy_source.fuel_categories, "requires fuel", entity_verbs.fuel)
         elseif type == "heat" then
-            self:add_dependency(nodes, node_types.electricity_node, 1, "requires a heat source", electricity_verbs.heat)
+            self:add_dependency(nodes, node_types.electricity_node, "heat", "requires a heat source", entity_verbs.heat)
         elseif type == "fluid" then
         else
             assert(type == "void", "Unknown energy source type")
@@ -106,8 +106,8 @@ local entity_node = object_node_base:create_object_class("entity", node_types.en
         end
     end
 
-    if entity.type == "reactor" then
-        self:add_disjunctive_dependent(nodes, node_types.electricity_node, 1, "requires heat", electricity_verbs.heat)
+    if entity.type == "reactor" or entity.type == "heat-interface" then
+        self:add_disjunctive_dependent(nodes, node_types.electricity_node, "heat", "generates heat", electricity_verbs.heat)
     end
 
     if entity.type == "lab" then

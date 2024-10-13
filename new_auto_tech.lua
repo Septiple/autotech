@@ -112,6 +112,7 @@ function auto_tech:create_nodes()
     process_type(data.raw["planet"], planet_node)
     process_type(data.raw["autoplace-control"], autoplace_control_node)
     process_type(data.raw["tile"], tile_node)
+    process_type({{name = "heat"}}, electricity_node)
 
     for item_type in pairs(defines.prototypes.item) do
         process_type(data.raw[item_type], item_node)
