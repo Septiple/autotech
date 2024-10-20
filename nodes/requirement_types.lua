@@ -11,6 +11,5 @@ local requirement_types = {
     module_category = "module_category",
     recipe_category = "recipe_category",
     resource_category = "resource_category",
-    start = "start",
 }
 return requirement_types

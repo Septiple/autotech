@@ -1,8 +1,10 @@
 --- @module "definitions"
 
+local object_types = require "nodes.object_types"
+
 -- There are 3 kinds of requirement nodes:
 -- - generic requirements like electricity
--- - specific requirements like a recipe category
+-- - typed requirements like a recipe category
 -- - requirements specific to an object like the ingredients of a recipe
 
 ---@class RequirementNode
@@ -96,6 +98,13 @@ end
 function requirement_node:add_reverse_dependent(dependent)
     local reverse_depends = self.reverse_depends
     reverse_depends[#reverse_depends+1] = dependent
+end
+
+---@param productlike any
+---@param object_nodes ObjectNodes
+function requirement_node:add_productlike_fulfiller(productlike, object_nodes)
+    local type_of_productlike = productlike.type == "item" and object_types.item or object_types.fluid
+    self:add_fulfiller(object_nodes[type_of_productlike][productlike.name])
 end
 
 return requirement_node

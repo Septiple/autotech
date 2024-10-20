@@ -93,7 +93,7 @@ function auto_tech:run()
 end
 
 function auto_tech:create_nodes()
-    requirement_node:new_independent_requirement(requirement_types.start, self.requirement_nodes, self.configuration)
+    object_node:new({name="start"}, object_types.start, self.object_nodes, self.configuration)
     requirement_node:new_independent_requirement(requirement_types.electricity, self.requirement_nodes, self.configuration)
     requirement_node:new_independent_requirement(requirement_types.fluid_with_fuel_value, self.requirement_nodes, self.configuration)
     requirement_node:new_independent_requirement(requirement_types.heat, self.requirement_nodes, self.configuration)
@@ -164,9 +164,11 @@ end
 
 function auto_tech:link_nodes()
     for object_type, object_set in pairs(self.object_nodes) do
-        local functor = functor_map[object_type]
-        for _, object in pairs(object_set) do
-            functor:register_dependencies(object, self.requirement_nodes, self.object_nodes)
+        if object_type ~= object_types.start then
+            local functor = functor_map[object_type]
+            for _, object in pairs(object_set) do
+                functor:register_dependencies(object, self.requirement_nodes, self.object_nodes)
+            end
         end
     end
 end

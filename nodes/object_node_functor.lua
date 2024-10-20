@@ -1,5 +1,4 @@
 --- @module "definitions"
-local requirement_node = require "nodes.requirement_node"
 
 ---@class ObjectNodeFunctor
 ---@field object_type ObjectType
@@ -46,10 +45,20 @@ function object_node_functor:register_dependencies(object, requirement_nodes, ob
     self.register_dependencies_func(object, requirement_nodes, object_nodes)
 end
 
+-- These are static helper functions
+
 ---@param object ObjectNode
 ---@param requirement_type RequirementType
 ---@param requirement_nodes RequirementNodes
 function object_node_functor:add_fulfiller_for_independent_requirement(object, requirement_type, requirement_nodes)
+    local requirement = requirement_nodes[requirement_type][requirement_type]
+    requirement:add_fulfiller(object)
+end
+
+---@param object ObjectNode
+---@param requirement_type RequirementType
+---@param requirement_nodes RequirementNodes
+function object_node_functor:add_fulfiller_for_typed_requirement(object, requirement_type, requirement_nodes)
     local requirement = requirement_nodes[requirement_type][requirement_type]
     requirement:add_fulfiller(object)
 end
@@ -68,6 +77,21 @@ function object_node_functor:add_fulfiller_for_object_requirement(object, name, 
     local target_node = object_nodes_for_type[name]
     local requirement_node = target_node.depends[requirement]
     requirement_node:add_fulfiller(object)
+end
+
+---@param object ObjectNode
+---@param name string?
+---@param requirement_type RequirementType
+---@param requirement_nodes RequirementNodes
+function object_node_functor:add_typed_requirement_to_object(object, name, requirement_type, requirement_nodes)
+    if name == nil then
+        return
+    end
+    local requirement = requirement_nodes[requirement_type][name]
+    if requirement == nil then
+        error("Cannot find requirement " .. name .. " of type " .. requirement_type)
+    end
+    object:add_requirement(requirement)
 end
 
 return object_node_functor
