@@ -1,4 +1,5 @@
 --- @module "definitions"
+local requirement_node = require "nodes.requirement_node"
 
 ---@class ObjectNodeFunctor
 ---@field object_type ObjectType
@@ -43,6 +44,14 @@ end
 function object_node_functor:register_dependencies(object, requirement_nodes, object_nodes)
     self:check_object_type(object)
     self.register_dependencies_func(object, requirement_nodes, object_nodes)
+end
+
+---@param object ObjectNode
+---@param requirement_type RequirementType
+---@param requirement_nodes RequirementNodes
+function object_node_functor:add_fulfiller_for_independent_requirement(object, requirement_type, requirement_nodes)
+    local requirement = requirement_node:find_independent_requirement(requirement_type, requirement_nodes)
+    requirement:add_fulfiller(object)
 end
 
 ---@param object ObjectNode

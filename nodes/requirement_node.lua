@@ -114,4 +114,11 @@ function requirement_node:add_reverse_dependent(dependent)
     reverse_depends[#reverse_depends+1] = dependent
 end
 
+---@param source RequirementType
+---@param requirement_nodes RequirementNodes
+---@return RequirementNode
+function requirement_node:find_independent_requirement(source, requirement_nodes)
+    return requirement_nodes[source][requirement_type_to_string[source]]
+end
+
 return requirement_node
