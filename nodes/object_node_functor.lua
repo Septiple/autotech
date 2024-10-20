@@ -1,5 +1,7 @@
 --- @module "definitions"
 
+local object_types = require "nodes.object_types"
+
 ---@class ObjectNodeFunctor
 ---@field object_type ObjectType
 ---@field configuration Configuration
@@ -92,6 +94,37 @@ function object_node_functor:add_typed_requirement_to_object(object, name, requi
         error("Cannot find requirement " .. name .. " of type " .. requirement_type)
     end
     object:add_requirement(requirement)
+end
+
+---@param requirement RequirementNode
+---@param productlike any
+---@param object_nodes ObjectNodes
+function object_node_functor:add_productlike_fulfiller(requirement, productlike, object_nodes)
+    local type_of_productlike = productlike.type == "item" and object_types.item or object_types.fluid
+    requirement:add_fulfiller(object_nodes[type_of_productlike][productlike.name])
+end
+
+---@param fulfiller ObjectNode
+---@param productlike_possibly_table any
+---@param target_requirement_type string
+---@param object_nodes ObjectNodes
+function object_node_functor:add_fulfiller_to_productlike_object(fulfiller, productlike_possibly_table, target_requirement_type, object_nodes)
+    if productlike_possibly_table == nil then
+        return
+    end
+
+    function inner_function(productlike)
+        local type_of_productlike = productlike.type == "item" and object_types.item or object_types.fluid
+        object_nodes[type_of_productlike][productlike.name].depends[target_requirement_type]:add_fulfiller(fulfiller)
+    end
+
+    if type(productlike_possibly_table) == "table" then
+        for _, productlike in pairs(productlike_possibly_table or {}) do
+            inner_function(productlike)
+        end
+    else
+        inner_function(productlike_possibly_table)
+    end
 end
 
 return object_node_functor

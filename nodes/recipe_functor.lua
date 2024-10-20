@@ -24,14 +24,11 @@ function (object, requirement_nodes, object_nodes)
 
     local i = 1
     for _, ingredient in pairs(recipe.ingredients or {}) do
-        local ingredient_node = object.depends[recipe_requirements.ingredient .. i]
-        ingredient_node:add_productlike_fulfiller(ingredient, object_nodes)
+        object_node_functor:add_productlike_fulfiller(object.depends[recipe_requirements.ingredient .. i], ingredient, object_nodes)
         i = i + 1
     end
 
-    for _, result in pairs(recipe.results or {}) do
-        object_nodes[result.type == 'item' and object_types.item or object_types.fluid][result.name].depends[item_requirements.create]:add_fulfiller(object)
-    end
+    object_node_functor:add_fulfiller_to_productlike_object(object, recipe.results, item_requirements.create, object_nodes)
 
     if recipe.enabled ~= false then
         object.depends[recipe_requirements.enable]:add_fulfiller(object_nodes[object_types.start][object_types.start])
