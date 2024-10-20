@@ -50,7 +50,7 @@ end
 ---@param requirement_type RequirementType
 ---@param requirement_nodes RequirementNodes
 function object_node_functor:add_fulfiller_for_independent_requirement(object, requirement_type, requirement_nodes)
-    local requirement = requirement_node:find_independent_requirement(requirement_type, requirement_nodes)
+    local requirement = requirement_nodes[requirement_type][requirement_type]
     requirement:add_fulfiller(object)
 end
 

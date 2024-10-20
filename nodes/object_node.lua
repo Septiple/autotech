@@ -1,16 +1,4 @@
 --- @module "definitions"
-local requirement_node = require "nodes.requirement_node"
-
-local requirement_type_to_string = {
-    "entity",
-    "fluid",
-    "item",
-    "recipe",
-    "start",
-    "technology",
-    "planet",
-    "tile",
-}
 
 ---@class ObjectNode
 ---@field object FactorioThing
@@ -34,7 +22,7 @@ function object_node:new(object, object_type, object_nodes, configuration)
     result.object = object
     result.object_type = object_type
     result.configuration = configuration
-    result.printable_name = object.name .. " (" .. requirement_type_to_string[result.object_type] .. ")"
+    result.printable_name = object.name .. " (" .. result.object_type .. ")"
 
     result.depends = {}
     result.reverse_disjunctive_depends = {}

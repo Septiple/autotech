@@ -1,16 +1,16 @@
 ---@enum RequirementType
 local requirement_types = {
-    ammo_category = 1,
-    electricity = 2,
-    equipment_grid = 3,
-    fluid_fuel = 4,
-    fuel_category = 5,
-    recipe_category = 6,
-    resource_category = 7,
-    module_category = 8,
-    autoplace_control = 9,
-    heat = 10,
-    start = 11,
-    fluid_with_fuel_value = 12,
+    ammo_category = "ammo_category",
+    autoplace_control = "autoplace_control",
+    electricity = "electricity",
+    equipment_grid = "equipment_grid",
+    fluid_fuel = "fluid_fuel",
+    fluid_with_fuel_value = "fluid_with_fuel_value",
+    fuel_category = "fuel_category",
+    heat = "heat",
+    module_category = "module_category",
+    recipe_category = "recipe_category",
+    resource_category = "resource_category",
+    start = "start",
 }
 return requirement_types

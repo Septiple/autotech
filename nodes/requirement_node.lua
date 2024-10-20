@@ -1,20 +1,5 @@
 --- @module "definitions"
 
-local requirement_type_to_string = {
-    "ammo_category",
-    "electricity",
-    "equipment_grid",
-    "fluid_fuel",
-    "fuel_category",
-    "recipe_category",
-    "resource_category",
-    "module_category",
-    "autoplace_control",
-    "heat",
-    "start",
-    "fluid_with_fuel_value",
-}
-
 -- There are 3 kinds of requirement nodes:
 -- - generic requirements like electricity
 -- - specific requirements like a recipe category
@@ -73,8 +58,7 @@ end
 ---@param configuration Configuration
 ---@return RequirementNode
 function requirement_node:new_independent_requirement(source, requirement_nodes, configuration)
-    local name = requirement_type_to_string[source]
-    return self:new(name, source, name, requirement_nodes, configuration)
+    return self:new(source, source, source, requirement_nodes, configuration)
 end
 
 ---@param name string
@@ -83,7 +67,7 @@ end
 ---@param configuration Configuration
 ---@return RequirementNode
 function requirement_node:new_typed_requirement(name, source, requirement_nodes, configuration)
-    return self:new(name, source, name .. " (" .. requirement_type_to_string[source] .. ")", requirement_nodes, configuration)
+    return self:new(name, source, name .. " (" .. source .. ")", requirement_nodes, configuration)
 end
 
 ---@param name string
@@ -112,13 +96,6 @@ end
 function requirement_node:add_reverse_dependent(dependent)
     local reverse_depends = self.reverse_depends
     reverse_depends[#reverse_depends+1] = dependent
-end
-
----@param source RequirementType
----@param requirement_nodes RequirementNodes
----@return RequirementNode
-function requirement_node:find_independent_requirement(source, requirement_nodes)
-    return requirement_nodes[source][requirement_type_to_string[source]]
 end
 
 return requirement_node
