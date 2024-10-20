@@ -2,11 +2,19 @@ local object_types = require "nodes.object_types"
 local object_node_functor = require "nodes.object_node_functor"
 local requirement_node = require "nodes.requirement_node"
 local requirement_types = require "nodes.requirement_types"
-local item_requirements = require "nodes.item_requirements"
-local entity_requirements = require "nodes.entity_requirements"
+local recipe_requirements = require "nodes.recipe_requirements"
 
 local recipe_functor = object_node_functor:new(object_types.recipe,
 function (object, requirement_nodes)
+    requirement_node:add_new_object_dependent_requirement(recipe_requirements.enable, object, requirement_nodes, object.configuration)
+
+    local recipe = object.object
+    if recipe.ingredients ~= nil then
+        local nr_ingredients = #recipe.ingredients
+        for i = 1, nr_ingredients do
+            requirement_node:add_new_object_dependent_requirement(recipe_requirements.ingredient .. i, object, requirement_nodes, object.configuration)
+        end
+    end
 end,
 function (object, requirement_nodes, object_nodes)
 end)

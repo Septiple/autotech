@@ -1,12 +1,11 @@
 local object_types = require "nodes.object_types"
 local object_node_functor = require "nodes.object_node_functor"
 local requirement_node = require "nodes.requirement_node"
-local requirement_types = require "nodes.requirement_types"
-local item_requirements = require "nodes.item_requirements"
-local entity_requirements = require "nodes.entity_requirements"
+local planet_requirements = require "nodes.planet_requirements"
 
 local planet_functor = object_node_functor:new(object_types.planet,
 function (object, requirement_nodes)
+    requirement_node:add_new_object_dependent_requirement(planet_requirements.visit, object, requirement_nodes, object.configuration)
 end,
 function (object, requirement_nodes, object_nodes)
 end)
