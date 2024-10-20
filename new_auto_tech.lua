@@ -1,42 +1,53 @@
---- @module "factorio_meta"
+--- @module "definitions"
 
 local deque = require "utils.deque"
 
-local node_types = require "nodes.node_types"
+local object_node = require "nodes.object_node"
+local object_types = require "nodes.object_types"
+local requirement_node = require "nodes.requirement_node"
+local requirement_types = require "nodes.requirement_types"
 
-local ammo_category_node = require "nodes.ammo_category_node"
-local electricity_node = require "nodes.electricity_node"
-local entity_node = require "nodes.entity_node"
-local equipment_grid_node = require "nodes.equipment_grid_node"
-local fluid_fuel_node = require "nodes.fluid_fuel_node"
-local fluid_node = require "nodes.fluid_node"
-local fuel_category_node = require "nodes.fuel_category_node"
-local item_node = require "nodes.item_node"
-local recipe_category_node = require "nodes.recipe_category_node"
-local recipe_node = require "nodes.recipe_node"
-local resource_category_node = require "nodes.resource_category_node"
-local start_node = require "nodes.start_node"
-local technology_node = require "nodes.technology_node"
-local planet_node = require "nodes.planet_node"
-local module_category_node = require "nodes.module_category_node"
-local autoplace_control_node = require "nodes.autoplace_control_node"
-local tile_node = require "nodes.tile_node"
+local entity_functor = require "nodes.entity_functor"
+local fluid_functor = require "nodes.fluid_functor"
+local item_functor = require "nodes.item_functor"
+local planet_functor = require "nodes.planet_functor"
+local recipe_functor = require "nodes.recipe_functor"
+local technology_functor = require "nodes.technology_functor"
+local tile_functor = require "nodes.tile_functor"
+
+---@type table<ObjectType, ObjectNodeFunctor>
+local functor_map = {}
+functor_map[object_types.entity] = entity_functor
+functor_map[object_types.fluid] = fluid_functor
+functor_map[object_types.item] = item_functor
+functor_map[object_types.planet] = planet_functor
+functor_map[object_types.recipe] = recipe_functor
+functor_map[object_types.technology] = technology_functor
+functor_map[object_types.tile] = tile_functor
 
 --- @class auto_tech
 --- @field private configuration Configuration
---- @field private nodes_per_node_type table<NodeType, ObjectNodeBase>
+--- @field private object_nodes ObjectNodes
+--- @field private requirement_nodes RequirementNodes
 local auto_tech = {}
 auto_tech.__index = auto_tech
 
 ---@param configuration Configuration
 ---@return auto_tech
 function auto_tech.create(configuration)
-    local a = {}
-    setmetatable(a, auto_tech)
+    local result = {}
+    setmetatable(result, auto_tech)
 
-    a.nodes_per_node_type = {}
-    a.configuration = configuration
-    return a
+    result.configuration = configuration
+    result.object_nodes = {}
+    for _, object_type in pairs(object_types) do
+        result.object_nodes[object_type] = {}
+    end
+    result.requirement_nodes = {}
+    for _, requirement_type in pairs(requirement_types) do
+        result.requirement_nodes[requirement_type] = {}
+    end
+    return result
 end
 
 function auto_tech:run_phase(phase_function, phase_name)
@@ -82,40 +93,43 @@ function auto_tech:run()
 end
 
 function auto_tech:create_nodes()
-    for _, node_type in pairs(node_types) do
-        self.nodes_per_node_type[node_type] = {}
-    end
-
-    start_node:create(nil, self.nodes_per_node_type, self.configuration)
-    electricity_node:create(nil, self.nodes_per_node_type, self.configuration)
-    fluid_fuel_node:create(nil, self.nodes_per_node_type, self.configuration)
+    requirement_node:new_independent_requirement(requirement_types.start, self.requirement_nodes, self.configuration)
+    requirement_node:new_independent_requirement(requirement_types.electricity, self.requirement_nodes, self.configuration)
+    requirement_node:new_independent_requirement(requirement_types.fluid_with_fuel_value, self.requirement_nodes, self.configuration)
+    requirement_node:new_independent_requirement(requirement_types.heat, self.requirement_nodes, self.configuration)
 
     ---@param table FactorioThingGroup
-    ---@param node_type ObjectNodeBase
-    local function process_type(table, node_type)
-        -- this is a sentinel value for a dependency on *any* existance of a certian prototype. for example seeds require any agri tower prototype
-        node_type:create(nil, self.nodes_per_node_type, self.configuration)
-
-        for _, object in pairs(table or {}) do
-            node_type:create(object, self.nodes_per_node_type, self.configuration)
+    ---@param requirement_type RequirementType
+    local function process_requirement_type(table, requirement_type)
+        for _, requirement in pairs(table or {}) do
+            requirement_node:new_typed_requirement(requirement.name, requirement_type, self.requirement_nodes, self.configuration)
         end
     end
 
-    process_type(data.raw["ammo-category"], ammo_category_node)
-    process_type(data.raw["equipment-grid"], equipment_grid_node)
-    process_type(data.raw["fluid"], fluid_node)
-    process_type(data.raw["fuel-category"], fuel_category_node)
-    process_type(data.raw["recipe-category"], recipe_category_node)
-    process_type(data.raw["recipe"], recipe_node)
-    process_type(data.raw["resource-category"], resource_category_node)
-    process_type(data.raw["technology"], technology_node)
-    process_type(data.raw["planet"], planet_node)
-    process_type(data.raw["autoplace-control"], autoplace_control_node)
-    process_type(data.raw["tile"], tile_node)
-    process_type({{name = "heat"}}, electricity_node)
+    ---@param table FactorioThingGroup
+    ---@param functor ObjectNodeFunctor
+    local function process_object_type(table, functor)
+        for _, object in pairs(table or {}) do
+            local object = object_node:new(object, functor.object_type, self.object_nodes, self.configuration)
+            functor.register_requirements_func(object, self.requirement_nodes)
+        end
+    end
+
+    process_requirement_type(data.raw["ammo-category"], requirement_types.ammo_category)
+    process_requirement_type(data.raw["equipment-grid"], requirement_types.equipment_grid)
+    process_requirement_type(data.raw["fuel-category"], requirement_types.fuel_category)
+    process_requirement_type(data.raw["recipe-category"], requirement_types.recipe_category)
+    process_requirement_type(data.raw["resource-category"], requirement_types.resource_category)
+    process_requirement_type(data.raw["autoplace-control"], requirement_types.autoplace_control)
+
+    process_object_type(data.raw["fluid"], fluid_functor)
+    process_object_type(data.raw["recipe"], recipe_functor)
+    process_object_type(data.raw["technology"], technology_functor)
+    process_object_type(data.raw["planet"], planet_functor)
+    process_object_type(data.raw["tile"], tile_functor)
 
     for item_type in pairs(defines.prototypes.item) do
-        process_type(data.raw[item_type], item_node)
+        process_object_type(data.raw[item_type], item_functor)
     end
 
     local module_categories = {}
@@ -124,9 +138,9 @@ function auto_tech:create_nodes()
     end
 
     -- asteroid chunks are actually not entities however they define standard minable properties.
-    process_type(data.raw["asteroid-chunk"], entity_node)
+    process_object_type(data.raw["asteroid-chunk"], entity_functor)
     for entity_type in pairs(defines.prototypes.entity) do
-        process_type(data.raw[entity_type], entity_node)
+        process_object_type(data.raw[entity_type], entity_functor)
 
         for _, entity in pairs(data.raw[entity_type] or {}) do
             if entity.allowed_module_categories then
@@ -145,15 +159,14 @@ function auto_tech:create_nodes()
         })
     end
 
-    process_type(_module_categories, module_category_node)
+    process_requirement_type(_module_categories, requirement_types.module_category)
 end
 
 function auto_tech:link_nodes()
-    for _, node_type in pairs(self.nodes_per_node_type) do
-        for _, node in pairs(node_type) do
-            if node.object then
-                node:register_dependencies(self.nodes_per_node_type)
-            end
+    for object_type, object_set in pairs(self.object_nodes) do
+        local functor = functor_map[object_type]
+        for _, object in pairs(object_set) do
+            functor:register_dependencies(object, self.requirement_nodes, self.object_nodes)
         end
     end
 end

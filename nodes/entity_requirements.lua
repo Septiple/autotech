@@ -1,12 +1,11 @@
-return {
+---@enum EntityRequirements
+local entity_requirements = {
     instantiate = "instantiate",
-    fuel = "fuel",
-    required_fluid = "supply fluid to",
+    -- not so sure about the next ones, let's think about them later
     requires_agri_tower = "grow",
     requires_cargo_landing_pad = "land on with cargo for",
     requires_rail_supports = "have rail support",
     requires_rail_ramp = "have rail ramps",
     requires_rail = "place on",
-    power = "power",
-    heat = "heat",
 }
+return entity_requirements
