@@ -11,3 +11,6 @@
 --- @alias FactorioThing { name: string }
 --- @alias FactorioThingGroup table<string, FactorioThing>
 --- @alias DataRaw table<string, FactorioThingGroup>
+
+-- TODO: use built-in Factorio types
+--- @alias FluidDefinition { name: string, fuel_value: number }

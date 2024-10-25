@@ -10,6 +10,8 @@ function (object, requirement_nodes)
 end,
 function (object, requirement_nodes, object_nodes)
     local fluid = object.object
+    ---@cast fluid FluidDefinition
+
     if fluid.fuel_value ~= nil then
         object_node_functor:add_fulfiller_for_independent_requirement(object, requirement_types.fluid_fuel, requirement_nodes)
     end
