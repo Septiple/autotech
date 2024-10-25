@@ -5,18 +5,22 @@ local planet_requirements = require "nodes.planet_requirements"
 
 local planet_functor = object_node_functor:new(object_types.planet,
 function (object, requirement_nodes)
+    local planet = object.object
+    ---@cast planet PlanetDefinition
+
     requirement_node:add_new_object_dependent_requirement(planet_requirements.visit, object, requirement_nodes, object.configuration)
+    if planet.entities_require_heating and defines.feature_flags.freezing then
+        requirement_node:add_new_object_dependent_requirement(planet_requirements.requires_heating, object, requirement_nodes, object.configuration)
+    end
 end,
 function (object, requirement_nodes, object_nodes)
+    local planet = object.object
+    ---@cast planet PlanetDefinition
+
+    local mgs = planet.map_gen_settings
+    if not mgs then return end
 end)
 return planet_functor
-
--- if planet.entities_require_heating and defines.feature_flags.freezing then
---     self:add_dependency(nodes, node_types.electricity_node, 1, "requires a heat source", electricity_verbs.heat)
--- end
-
--- local mgs = planet.map_gen_settings
--- if not mgs then return end
 
 -- self:add_disjunctive_dependent(nodes, node_types.entity_node, mgs.cliff_settings, "cliff autoplace", entity_verbs.instantiate, "name")
 -- self:add_disjunctive_dependent(nodes, node_types.entity_node, mgs.territory_settings, "planet territory owner", entity_verbs.instantiate, "units")

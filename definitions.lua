@@ -14,3 +14,5 @@
 
 -- TODO: use built-in Factorio types
 --- @alias FluidDefinition { name: string, fuel_value: number }
+--- @alias MapGenSettingsDefinition {}
+--- @alias PlanetDefinition { name: string, entities_require_heating: boolean, map_gen_settings: MapGenSettingsDefinition? }
