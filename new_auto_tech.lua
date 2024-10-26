@@ -162,14 +162,12 @@ function auto_tech:create_nodes()
 end
 
 function auto_tech:link_nodes()
-    for object_type, object_set in pairs(self.object_nodes:all_nodes()) do
-        if object_type ~= object_types.start then
-            local functor = functor_map[object_type]
-            for _, object in pairs(object_set) do
-                functor:register_dependencies(object, self.requirement_nodes, self.object_nodes)
-            end
+    self.object_nodes:for_all_nodes(function (object_type, object)
+        if object_type == object_types.start then
+            return
         end
-    end
+        functor_map[object_type]:register_dependencies(object, self.requirement_nodes, self.object_nodes)
+    end)
 end
 
 function auto_tech:linearise_recipe_graph()

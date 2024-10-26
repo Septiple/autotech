@@ -35,9 +35,13 @@ function object_node_storage:find_object_node(descriptor)
     return self.nodes[descriptor.object_type][descriptor.name]
 end
 
----@returns table<ObjectType, table<string, ObjectNode>>
-function object_node_storage:all_nodes()
-    return self.nodes
+---@param functor fun(object_type: ObjectType, object: ObjectNode)
+function object_node_storage:for_all_nodes(functor)
+    for object_type, object_set in pairs(self.nodes) do
+        for _, object in pairs(object_set) do
+            functor(object_type, object)
+        end
+    end
 end
 
 return object_node_storage
