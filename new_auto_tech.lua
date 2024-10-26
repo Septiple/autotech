@@ -9,13 +9,13 @@ local object_node_storage = require "object_nodes.object_node_storage"
 local requirement_node = require "requirement_nodes.requirement_node"
 local requirement_types = require "requirement_nodes.requirement_types"
 
-local entity_functor = require "nodes.entity_functor"
-local fluid_functor = require "nodes.fluid_functor"
-local item_functor = require "nodes.item_functor"
-local planet_functor = require "nodes.planet_functor"
-local recipe_functor = require "nodes.recipe_functor"
-local technology_functor = require "nodes.technology_functor"
-local tile_functor = require "nodes.tile_functor"
+local entity_functor = require "functors.entity_functor"
+local fluid_functor = require "functors.fluid_functor"
+local item_functor = require "functors.item_functor"
+local planet_functor = require "functors.planet_functor"
+local recipe_functor = require "functors.recipe_functor"
+local technology_functor = require "functors.technology_functor"
+local tile_functor = require "functors.tile_functor"
 
 ---@type table<ObjectType, ObjectNodeFunctor>
 local functor_map = {}

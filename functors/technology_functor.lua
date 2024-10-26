@@ -2,7 +2,7 @@ local object_types = require "object_nodes.object_types"
 local object_node_functor = require "object_nodes.object_node_functor"
 local requirement_node = require "requirement_nodes.requirement_node"
 local requirement_types = require "requirement_nodes.requirement_types"
-local technology_requirements = require "nodes.technology_requirements"
+local technology_requirements = require "requirements.technology_requirements"
 
 local technology_functor = object_node_functor:new(object_types.technology,
 function (object, requirement_nodes)
