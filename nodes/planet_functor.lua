@@ -1,6 +1,6 @@
-local object_types = require "nodes.object_types"
-local object_node_descriptor = require "nodes.object_node_descriptor"
-local object_node_functor = require "nodes.object_node_functor"
+local object_types = require "object_nodes.object_types"
+local object_node_descriptor = require "object_nodes.object_node_descriptor"
+local object_node_functor = require "object_nodes.object_node_functor"
 local requirement_node = require "nodes.requirement_node"
 local planet_requirements = require "nodes.planet_requirements"
 

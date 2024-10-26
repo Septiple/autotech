@@ -1,4 +1,4 @@
-local object_types = require "nodes.object_types"
+local object_types = require "object_nodes.object_types"
 
 ---@class ObjectNodeStorage
 ---@field nodes table<ObjectType, table<string, ObjectNode>>

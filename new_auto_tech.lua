@@ -2,10 +2,10 @@
 
 local deque = require "utils.deque"
 
-local object_node = require "nodes.object_node"
-local object_types = require "nodes.object_types"
-local object_node_descriptor = require "nodes.object_node_descriptor"
-local object_node_storage = require "nodes.object_node_storage"
+local object_node = require "object_nodes.object_node"
+local object_types = require "object_nodes.object_types"
+local object_node_descriptor = require "object_nodes.object_node_descriptor"
+local object_node_storage = require "object_nodes.object_node_storage"
 local requirement_node = require "nodes.requirement_node"
 local requirement_types = require "nodes.requirement_types"
 

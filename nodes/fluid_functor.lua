@@ -1,5 +1,5 @@
-local object_types = require "nodes.object_types"
-local object_node_functor = require "nodes.object_node_functor"
+local object_types = require "object_nodes.object_types"
+local object_node_functor = require "object_nodes.object_node_functor"
 local requirement_node = require "nodes.requirement_node"
 local requirement_types = require "nodes.requirement_types"
 local fluid_requirements = require "nodes.fluid_requirements"
