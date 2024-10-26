@@ -1,8 +1,8 @@
 local object_types = require "object_nodes.object_types"
 local object_node_descriptor = require "object_nodes.object_node_descriptor"
 local object_node_functor = require "object_nodes.object_node_functor"
-local requirement_node = require "nodes.requirement_node"
-local requirement_types = require "nodes.requirement_types"
+local requirement_node = require "requirement_nodes.requirement_node"
+local requirement_types = require "requirement_nodes.requirement_types"
 local item_requirements = require "nodes.item_requirements"
 local entity_requirements = require "nodes.entity_requirements"
 

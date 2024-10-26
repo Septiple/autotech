@@ -1,7 +1,7 @@
 local object_types = require "object_nodes.object_types"
 local object_node_descriptor = require "object_nodes.object_node_descriptor"
 local object_node_functor = require "object_nodes.object_node_functor"
-local requirement_node = require "nodes.requirement_node"
+local requirement_node = require "requirement_nodes.requirement_node"
 local planet_requirements = require "nodes.planet_requirements"
 
 local planet_functor = object_node_functor:new(object_types.planet,
