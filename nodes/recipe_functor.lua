@@ -1,4 +1,5 @@
 local object_types = require "nodes.object_types"
+local object_node_descriptor = require "nodes.object_node_descriptor"
 local object_node_functor = require "nodes.object_node_functor"
 local requirement_node = require "nodes.requirement_node"
 local requirement_types = require "nodes.requirement_types"
@@ -31,7 +32,7 @@ function (object, requirement_nodes, object_nodes)
     object_node_functor:add_fulfiller_to_productlike_object(object, recipe.results, item_requirements.create, object_nodes)
 
     if recipe.enabled ~= false then
-        object.depends[recipe_requirements.enable]:add_fulfiller(object_nodes[object_types.start][object_types.start])
+        object.depends[recipe_requirements.enable]:add_fulfiller(object_nodes:find_object_node(object_node_descriptor:unique_node(object_types.start)))
     end
 end)
 return recipe_functor

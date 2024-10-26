@@ -4,6 +4,8 @@ local deque = require "utils.deque"
 
 local object_node = require "nodes.object_node"
 local object_types = require "nodes.object_types"
+local object_node_descriptor = require "nodes.object_node_descriptor"
+local object_node_storage = require "nodes.object_node_storage"
 local requirement_node = require "nodes.requirement_node"
 local requirement_types = require "nodes.requirement_types"
 
@@ -27,7 +29,7 @@ functor_map[object_types.tile] = tile_functor
 
 --- @class auto_tech
 --- @field private configuration Configuration
---- @field private object_nodes ObjectNodes
+--- @field private object_nodes ObjectNodeStorage
 --- @field private requirement_nodes RequirementNodes
 local auto_tech = {}
 auto_tech.__index = auto_tech
@@ -39,10 +41,7 @@ function auto_tech.create(configuration)
     setmetatable(result, auto_tech)
 
     result.configuration = configuration
-    result.object_nodes = {}
-    for _, object_type in pairs(object_types) do
-        result.object_nodes[object_type] = {}
-    end
+    result.object_nodes = object_node_storage:new()
     result.requirement_nodes = {}
     for _, requirement_type in pairs(requirement_types) do
         result.requirement_nodes[requirement_type] = {}
@@ -93,7 +92,7 @@ function auto_tech:run()
 end
 
 function auto_tech:create_nodes()
-    object_node:new({name="start"}, object_types.start, self.object_nodes, self.configuration)
+    object_node:new({name="start"}, object_node_descriptor:unique_node(object_types.start), self.object_nodes, self.configuration)
     requirement_node:new_independent_requirement(requirement_types.electricity, self.requirement_nodes, self.configuration)
     requirement_node:new_independent_requirement(requirement_types.fluid_with_fuel_value, self.requirement_nodes, self.configuration)
     requirement_node:new_independent_requirement(requirement_types.heat, self.requirement_nodes, self.configuration)
@@ -110,8 +109,8 @@ function auto_tech:create_nodes()
     ---@param functor ObjectNodeFunctor
     local function process_object_type(table, functor)
         for _, object in pairs(table or {}) do
-            local object = object_node:new(object, functor.object_type, self.object_nodes, self.configuration)
-            functor.register_requirements_func(object, self.requirement_nodes)
+            local object_node = object_node:new(object, object_node_descriptor:new(object.name, functor.object_type), self.object_nodes, self.configuration)
+            functor.register_requirements_func(object_node, self.requirement_nodes)
         end
     end
 
@@ -163,7 +162,7 @@ function auto_tech:create_nodes()
 end
 
 function auto_tech:link_nodes()
-    for object_type, object_set in pairs(self.object_nodes) do
+    for object_type, object_set in pairs(self.object_nodes:all_nodes()) do
         if object_type ~= object_types.start then
             local functor = functor_map[object_type]
             for _, object in pairs(object_set) do

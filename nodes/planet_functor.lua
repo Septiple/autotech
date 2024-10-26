@@ -1,4 +1,5 @@
 local object_types = require "nodes.object_types"
+local object_node_descriptor = require "nodes.object_node_descriptor"
 local object_node_functor = require "nodes.object_node_functor"
 local requirement_node = require "nodes.requirement_node"
 local planet_requirements = require "nodes.planet_requirements"
@@ -16,6 +17,11 @@ end,
 function (object, requirement_nodes, object_nodes)
     local planet = object.object
     ---@cast planet PlanetDefinition
+
+    if planet.entities_require_heating and defines.feature_flags.freezing then
+        -- TODO: fix this
+        --object_node_functor:add_fulfiller_for_object_requirement(object, object_node_descriptor:unique_node(object_types.heat), entity_requirements.instantiate, object_nodes)
+    end
 
     local mgs = planet.map_gen_settings
     if not mgs then return end

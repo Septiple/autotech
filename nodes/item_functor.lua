@@ -1,4 +1,5 @@
 local object_types = require "nodes.object_types"
+local object_node_descriptor = require "nodes.object_node_descriptor"
 local object_node_functor = require "nodes.object_node_functor"
 local requirement_node = require "nodes.requirement_node"
 local requirement_types = require "nodes.requirement_types"
@@ -11,7 +12,7 @@ function (object, requirement_nodes)
 end,
 function (object, requirement_nodes, object_nodes)
     local item = object.object
-    object_node_functor:add_fulfiller_for_object_requirement(object, item.place_result, object_types.entity, entity_requirements.instantiate, object_nodes)
+    object_node_functor:add_fulfiller_for_object_requirement(object, object_node_descriptor:new(item.place_result, object_types.entity), entity_requirements.instantiate, object_nodes)
 end)
 return item_functor
 

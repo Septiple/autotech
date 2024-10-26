@@ -2,7 +2,7 @@
 
 ---@class ObjectNode
 ---@field object FactorioThing
----@field object_type ObjectType
+---@field descriptor ObjectNodeDescriptor
 ---@field printable_name string
 ---@field configuration Configuration
 ---@field depends table<string, RequirementNode>
@@ -11,27 +11,23 @@ local object_node = {}
 object_node.__index = object_node
 
 ---@param object FactorioThing
----@param object_type ObjectType
----@param object_nodes ObjectNodes
+---@param descriptor ObjectNodeDescriptor
+---@param object_nodes ObjectNodeStorage
 ---@param configuration Configuration
 ---@return ObjectNode
-function object_node:new(object, object_type, object_nodes, configuration)
+function object_node:new(object, descriptor, object_nodes, configuration)
     local result = {}
     setmetatable(result, self)
 
     result.object = object
-    result.object_type = object_type
+    result.descriptor = descriptor
+    result.printable_name = descriptor:printable_name()
     result.configuration = configuration
-    result.printable_name = object.name .. " (" .. result.object_type .. ")"
 
     result.depends = {}
     result.reverse_disjunctive_depends = {}
 
-    local object_nodes_for_type = object_nodes[object_type]
-    if object_nodes_for_type[object.name] ~= nil then
-        error("Duplicate object node " .. result.printable_name)
-    end
-    object_nodes_for_type[object.name] = result
+    object_nodes:add_object_node(result)
 
     if configuration.verbose_logging then
         log("Created object node for " .. result.printable_name)

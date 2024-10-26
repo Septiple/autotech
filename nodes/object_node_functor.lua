@@ -1,5 +1,6 @@
 --- @module "definitions"
 
+local object_node_descriptor = require "nodes.object_node_descriptor"
 local object_types = require "nodes.object_types"
 
 ---@class ObjectNodeFunctor
@@ -27,8 +28,8 @@ end
 ---@package
 ---@param object ObjectNode
 function object_node_functor:check_object_type(object)
-    if object.object_type ~= self.object_type then
-        error("Mismatching object type, expected " .. self.object_type .. ", actual " .. object.object_type)
+    if object.descriptor.object_type ~= self.object_type then
+        error("Mismatching object type, expected " .. self.object_type .. ", actual " .. object.descriptor.object_type)
     end
 end
 
@@ -41,7 +42,7 @@ end
 
 ---@param object ObjectNode
 ---@param requirement_nodes RequirementNodes
----@param object_nodes ObjectNodes
+---@param object_nodes ObjectNodeStorage
 function object_node_functor:register_dependencies(object, requirement_nodes, object_nodes)
     self:check_object_type(object)
     self.register_dependencies_func(object, requirement_nodes, object_nodes)
@@ -66,17 +67,15 @@ function object_node_functor:add_fulfiller_for_typed_requirement(object, require
 end
 
 ---@param object ObjectNode
----@param name string
----@param object_type ObjectType
+---@param object_descriptor ObjectNodeDescriptor
 ---@param requirement any
----@param object_nodes ObjectNodes
-function object_node_functor:add_fulfiller_for_object_requirement(object, name, object_type, requirement, object_nodes)
-    if name == nil then
+---@param object_nodes ObjectNodeStorage
+function object_node_functor:add_fulfiller_for_object_requirement(object, object_descriptor, requirement, object_nodes)
+    if not object_descriptor:valid() then
         return
     end
 
-    local object_nodes_for_type = object_nodes[object_type]
-    local target_node = object_nodes_for_type[name]
+    local target_node = object_nodes:find_object_node(object_descriptor)
     local requirement_node = target_node.depends[requirement]
     requirement_node:add_fulfiller(object)
 end
@@ -98,16 +97,17 @@ end
 
 ---@param requirement RequirementNode
 ---@param productlike any
----@param object_nodes ObjectNodes
+---@param object_nodes ObjectNodeStorage
 function object_node_functor:add_productlike_fulfiller(requirement, productlike, object_nodes)
     local type_of_productlike = productlike.type == "item" and object_types.item or object_types.fluid
-    requirement:add_fulfiller(object_nodes[type_of_productlike][productlike.name])
+    local descriptor = object_node_descriptor:new(productlike.name, type_of_productlike)
+    requirement:add_fulfiller(object_nodes:find_object_node(descriptor))
 end
 
 ---@param fulfiller ObjectNode
 ---@param productlike_possibly_table any
 ---@param target_requirement_type string
----@param object_nodes ObjectNodes
+---@param object_nodes ObjectNodeStorage
 function object_node_functor:add_fulfiller_to_productlike_object(fulfiller, productlike_possibly_table, target_requirement_type, object_nodes)
     if productlike_possibly_table == nil then
         return
@@ -115,7 +115,8 @@ function object_node_functor:add_fulfiller_to_productlike_object(fulfiller, prod
 
     function inner_function(productlike)
         local type_of_productlike = productlike.type == "item" and object_types.item or object_types.fluid
-        object_nodes[type_of_productlike][productlike.name].depends[target_requirement_type]:add_fulfiller(fulfiller)
+        local descriptor = object_node_descriptor:new(productlike.name, type_of_productlike)
+        object_nodes:find_object_node(descriptor).depends[target_requirement_type]:add_fulfiller(fulfiller)
     end
 
     if type(productlike_possibly_table) == "table" then
