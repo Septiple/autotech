@@ -22,7 +22,7 @@ function object_node:new(object, descriptor, object_nodes, configuration)
 
     result.object = object
     result.descriptor = descriptor
-    result.printable_name = descriptor:printable_name()
+    result.printable_name = descriptor.printable_name
     result.configuration = configuration
 
     result.depends = {}
