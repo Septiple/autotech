@@ -3,6 +3,7 @@
 local object_node_descriptor = require "object_nodes.object_node_descriptor"
 local object_types = require "object_nodes.object_types"
 
+---Defines how to register requirements and dependencies for a specific object type.
 ---@class ObjectNodeFunctor
 ---@field object_type ObjectType
 ---@field configuration Configuration

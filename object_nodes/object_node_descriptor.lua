@@ -1,3 +1,4 @@
+---Uniquely identifies an object node
 ---@class ObjectNodeDescriptor
 ---@field name string
 ---@field object_type ObjectType

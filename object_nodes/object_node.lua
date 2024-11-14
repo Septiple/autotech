@@ -1,5 +1,6 @@
 --- @module "definitions"
 
+---Represents a thing in Factorio. May have requirements, and may fulfil requirements.
 ---@class ObjectNode
 ---@field object FactorioThing
 ---@field descriptor ObjectNodeDescriptor

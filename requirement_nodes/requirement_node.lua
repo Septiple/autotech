@@ -5,6 +5,7 @@
 -- - typed requirements like a recipe category
 -- - requirements specific to an object like the ingredients of a recipe
 
+---Represents one of the three types of Factorio requirements for objects
 ---@class RequirementNode
 ---@field name string
 ---@field source RequirementType|ObjectNode

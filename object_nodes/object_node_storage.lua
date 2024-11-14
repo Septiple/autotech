@@ -1,5 +1,6 @@
 local object_types = require "object_nodes.object_types"
 
+---Maps ObjectNodeDescriptors to ObjectNodes, disallowing duplicates
 ---@class ObjectNodeStorage
 ---@field nodes table<ObjectType, table<string, ObjectNode>>
 local object_node_storage = {}
