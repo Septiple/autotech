@@ -1,5 +1,7 @@
 --- @module "definitions"
 
+local requirement_descriptor = require "requirement_nodes.requirement_descriptor"
+
 -- There are 3 kinds of requirement nodes:
 -- - generic requirements like electricity
 -- - typed requirements like a recipe category
@@ -7,8 +9,7 @@
 
 ---Represents one of the three types of Factorio requirements for objects
 ---@class RequirementNode
----@field name string
----@field source RequirementType|ObjectNode
+---@field descriptor RequirementNodeDescriptor
 ---@field printable_name string
 ---@field configuration Configuration
 ---@field disjunctive_depends ObjectNode[]
@@ -19,33 +20,22 @@ requirement_node.__index = requirement_node
 -- TODO: split up requirement_nodes according to the 3 types?
 
 ---@package
----@param name string
----@param source RequirementType|ObjectNode
----@param printable_name string
----@param requirement_nodes RequirementNodes
+---@param descriptor RequirementNodeDescriptor
+---@param requirement_nodes RequirementNodeStorage
 ---@param configuration Configuration
 ---@return RequirementNode
-function requirement_node:new(name, source, printable_name, requirement_nodes, configuration)
+function requirement_node:new(descriptor, requirement_nodes, configuration)
     local result = {}
     setmetatable(result, self)
 
-    result.name = name
-    result.source = source
-    result.printable_name = printable_name
+    result.descriptor = descriptor
+    result.printable_name = descriptor.printable_name
     result.configuration = configuration
 
     result.disjunctive_depends = {}
     result.reverse_depends = {}
 
-    local nodes_for_source = requirement_nodes[source]
-    if nodes_for_source == nil then
-        requirement_nodes[source] = {}
-        nodes_for_source = requirement_nodes[source]
-    end
-    if nodes_for_source[name] ~= nil then
-        error("Duplicate requirement node " .. result.printable_name)
-    end
-    nodes_for_source[name] = result
+    requirement_nodes:add_requirement_node(result)
 
     if configuration.verbose_logging then
         log("Created requirement node for " .. result.printable_name)
@@ -55,29 +45,29 @@ function requirement_node:new(name, source, printable_name, requirement_nodes, c
 end
 
 ---@param source RequirementType
----@param requirement_nodes RequirementNodes
+---@param requirement_nodes RequirementNodeStorage
 ---@param configuration Configuration
 ---@return RequirementNode
 function requirement_node:new_independent_requirement(source, requirement_nodes, configuration)
-    return self:new(source, source, source, requirement_nodes, configuration)
+    return self:new(requirement_descriptor:new_independent_requirement_descriptor(source), requirement_nodes, configuration)
 end
 
 ---@param name string
 ---@param source RequirementType
----@param requirement_nodes RequirementNodes
+---@param requirement_nodes RequirementNodeStorage
 ---@param configuration Configuration
 ---@return RequirementNode
 function requirement_node:new_typed_requirement(name, source, requirement_nodes, configuration)
-    return self:new(name, source, name .. " (" .. source .. ")", requirement_nodes, configuration)
+    return self:new(requirement_descriptor:new_typed_requirement_descriptor(name, source), requirement_nodes, configuration)
 end
 
 ---@param name string
 ---@param source_object ObjectNode
----@param requirement_nodes RequirementNodes
+---@param requirement_nodes RequirementNodeStorage
 ---@param configuration Configuration
 ---@return RequirementNode
 function requirement_node:add_new_object_dependent_requirement(name, source_object, requirement_nodes, configuration)
-    local new_requirement = self:new(name, source_object, name .. " (" .. source_object.printable_name .. ")", requirement_nodes, configuration)
+    local new_requirement = self:new(requirement_descriptor:new_object_dependent_requirement_descriptor(name, source_object), requirement_nodes, configuration)
     source_object:add_requirement(new_requirement)
     return new_requirement
 end

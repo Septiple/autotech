@@ -2,6 +2,7 @@
 
 local object_node_descriptor = require "object_nodes.object_node_descriptor"
 local object_types = require "object_nodes.object_types"
+local requirement_descriptor = require "requirement_nodes.requirement_descriptor"
 
 ---Defines how to register requirements and dependencies for a specific object type.
 ---@class ObjectNodeFunctor
@@ -35,14 +36,14 @@ function object_node_functor:check_object_type(object)
 end
 
 ---@param object ObjectNode
----@param requirement_nodes RequirementNodes
+---@param requirement_nodes RequirementNodeStorage
 function object_node_functor:register_requirements(object, requirement_nodes)
     self:check_object_type(object)
     self.register_requirements_func(object, requirement_nodes)
 end
 
 ---@param object ObjectNode
----@param requirement_nodes RequirementNodes
+---@param requirement_nodes RequirementNodeStorage
 ---@param object_nodes ObjectNodeStorage
 function object_node_functor:register_dependencies(object, requirement_nodes, object_nodes)
     self:check_object_type(object)
@@ -53,7 +54,7 @@ end
 
 ---@param object ObjectNode
 ---@param requirement_type RequirementType
----@param requirement_nodes RequirementNodes
+---@param requirement_nodes RequirementNodeStorage
 function object_node_functor:add_fulfiller_for_independent_requirement(object, requirement_type, requirement_nodes)
     local requirement = requirement_nodes[requirement_type][requirement_type]
     requirement:add_fulfiller(object)
@@ -61,7 +62,7 @@ end
 
 ---@param object ObjectNode
 ---@param requirement_type RequirementType
----@param requirement_nodes RequirementNodes
+---@param requirement_nodes RequirementNodeStorage
 function object_node_functor:add_fulfiller_for_typed_requirement(object, requirement_type, requirement_nodes)
     local requirement = requirement_nodes[requirement_type][requirement_type]
     requirement:add_fulfiller(object)
@@ -84,12 +85,12 @@ end
 ---@param object ObjectNode
 ---@param name string?
 ---@param requirement_type RequirementType
----@param requirement_nodes RequirementNodes
+---@param requirement_nodes RequirementNodeStorage
 function object_node_functor:add_typed_requirement_to_object(object, name, requirement_type, requirement_nodes)
     if name == nil then
         return
     end
-    local requirement = requirement_nodes[requirement_type][name]
+    local requirement = requirement_nodes:find_requirement_node(requirement_descriptor:new_typed_requirement_descriptor(name, requirement_type))
     if requirement == nil then
         error("Cannot find requirement " .. name .. " of type " .. requirement_type)
     end

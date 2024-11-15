@@ -8,6 +8,7 @@ local object_node_descriptor = require "object_nodes.object_node_descriptor"
 local object_node_storage = require "object_nodes.object_node_storage"
 local requirement_node = require "requirement_nodes.requirement_node"
 local requirement_types = require "requirement_nodes.requirement_types"
+local requirement_node_storage = require "requirement_nodes.requirement_node_storage"
 
 local entity_functor = require "functors.entity_functor"
 local fluid_functor = require "functors.fluid_functor"
@@ -30,7 +31,7 @@ functor_map[object_types.tile] = tile_functor
 --- @class auto_tech
 --- @field private configuration Configuration
 --- @field private object_nodes ObjectNodeStorage
---- @field private requirement_nodes RequirementNodes
+--- @field private requirement_nodes RequirementNodeStorage
 local auto_tech = {}
 auto_tech.__index = auto_tech
 
@@ -42,10 +43,7 @@ function auto_tech.create(configuration)
 
     result.configuration = configuration
     result.object_nodes = object_node_storage:new()
-    result.requirement_nodes = {}
-    for _, requirement_type in pairs(requirement_types) do
-        result.requirement_nodes[requirement_type] = {}
-    end
+    result.requirement_nodes = requirement_node_storage:new()
     return result
 end
 

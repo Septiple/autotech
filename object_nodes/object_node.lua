@@ -39,7 +39,7 @@ end
 
 ---@param requirement RequirementNode
 function object_node:add_requirement(requirement)
-    local requirement_type = requirement.name
+    local requirement_type = requirement.descriptor.name
     local depends = self.depends
     if depends[requirement_type] ~= nil then
         error("Duplicate requirement " .. requirement_type .. " on object " .. self.printable_name)
