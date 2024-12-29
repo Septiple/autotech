@@ -203,7 +203,7 @@ function auto_tech:linearise_recipe_graph()
     for _, nodes in pairs(self.object_nodes.nodes) do
         for _, node in pairs(nodes) do
             if not node:has_no_more_unfulfilled_requirements() then
-                log("Node " .. node.printable_name .. " still has unresolved dependencies: ")-- .. node:print_dependencies())
+                log("Node " .. node.printable_name .. " still has unresolved dependencies: " .. node:print_dependencies())
             end
         end
     end

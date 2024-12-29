@@ -45,12 +45,12 @@ end
 
 ---@param requirement RequirementNode
 function object_node:add_requirement(requirement)
-    local requirement_type = requirement.descriptor.name
+    local requirement_name = requirement.descriptor.name
     local requirements = self.requirements
-    if requirements[requirement_type] ~= nil then
-        error("Duplicate requirement " .. requirement_type .. " on object " .. self.printable_name)
+    if requirements[requirement_name] ~= nil then
+        error("Duplicate requirement " .. requirement_name .. " on object " .. self.printable_name)
     end
-    requirements[requirement_type] = requirement
+    requirements[requirement_name] = requirement
     self.nr_requirements = self.nr_requirements + 1
     ---@diagnostic disable-next-line: invisible
     requirement:add_requiring_node(self)
@@ -77,7 +77,7 @@ function object_node:on_fulfil_requirement(requirement)
     end
     fulfilled_requirements[requirement] = true
     self.nr_fulfilled_requirements = self.nr_fulfilled_requirements + 1
-    return true
+    return self:has_no_more_unfulfilled_requirements()
 end
 
 function object_node:on_node_becomes_independent()
@@ -89,6 +89,23 @@ function object_node:on_node_becomes_independent()
         end
     end
     return result
+end
+
+local function concat_requirements(requirements)
+    local dependency_names = ""
+    for requirement_name, _ in pairs(requirements) do
+        dependency_names = dependency_names .. requirement_name .. ", "
+    end
+    -- trim last ", "
+    if dependency_names:sub(-2) == ", " then
+        dependency_names = dependency_names:sub(1, -3)
+    end
+
+    return dependency_names
+end
+
+function object_node:print_dependencies()
+    return self.nr_requirements .. " requirements on " .. concat_requirements(self.requirements) .. ", " .. self.nr_fulfilled_requirements .. " fulfilled requirements on " .. concat_requirements(self.fulfilled_requirements)
 end
 
 return object_node
