@@ -14,6 +14,7 @@ local requirement_descriptor = require "requirement_nodes.requirement_descriptor
 ---@field configuration Configuration
 ---@field disjunctive_depends ObjectNode[]
 ---@field reverse_depends ObjectNode[]
+---@field canonical_fulfiller ObjectNode
 local requirement_node = {}
 requirement_node.__index = requirement_node
 
@@ -34,6 +35,7 @@ function requirement_node:new(descriptor, requirement_nodes, configuration)
 
     result.disjunctive_depends = {}
     result.reverse_depends = {}
+    result.canonical_fulfiller = nil
 
     requirement_nodes:add_requirement_node(result)
 
@@ -77,7 +79,7 @@ function requirement_node:add_fulfiller(fulfiller)
     local disjunctive_depends = self.disjunctive_depends
     disjunctive_depends[#disjunctive_depends+1] = fulfiller
     ---@diagnostic disable-next-line: invisible
-    fulfiller:add_reverse_disjunctive_fulfilled(self)
+    fulfiller:add_fulfiller(self)
 
     log("Object " .. fulfiller.printable_name .. " is able to fulfil the requirement " .. self.printable_name)
 end
@@ -87,6 +89,23 @@ end
 function requirement_node:add_reverse_dependent(dependent)
     local reverse_depends = self.reverse_depends
     reverse_depends[#reverse_depends+1] = dependent
+end
+
+---@param fulfiller ObjectNode
+function requirement_node:try_add_canonical_fulfiller(fulfiller)
+    if self.canonical_fulfiller then
+        return {}
+    end
+    self.canonical_fulfiller = fulfiller
+
+    local result = {}
+    for _, target in pairs(self.reverse_depends) do
+        local target_now_is_independent = target:on_fulfil_requirement(self.descriptor.name)
+        if target_now_is_independent then
+            result[#result+1] = target
+        end
+    end
+    return result
 end
 
 return requirement_node

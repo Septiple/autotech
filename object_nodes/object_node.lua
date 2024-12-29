@@ -6,8 +6,11 @@
 ---@field descriptor ObjectNodeDescriptor
 ---@field printable_name string
 ---@field configuration Configuration
----@field depends table<string, RequirementNode>
----@field reverse_disjunctive_depends RequirementNode[]
+---@field requirements table<string, RequirementNode>
+---@field nr_requirements int
+---@field fulfilled_requirements table<string, boolean>
+---@field nr_fulfilled_requirements int
+---@field can_fulfil RequirementNode[]
 local object_node = {}
 object_node.__index = object_node
 
@@ -25,8 +28,11 @@ function object_node:new(object, descriptor, object_nodes, configuration)
     result.printable_name = descriptor.printable_name
     result.configuration = configuration
 
-    result.depends = {}
-    result.reverse_disjunctive_depends = {}
+    result.requirements = {}
+    result.nr_requirements = 0
+    result.can_fulfil = {}
+    result.fulfilled_requirements = {}
+    result.nr_fulfilled_requirements = 0
 
     object_nodes:add_object_node(result)
 
@@ -40,11 +46,11 @@ end
 ---@param requirement RequirementNode
 function object_node:add_requirement(requirement)
     local requirement_type = requirement.descriptor.name
-    local depends = self.depends
-    if depends[requirement_type] ~= nil then
+    local requirements = self.requirements
+    if requirements[requirement_type] ~= nil then
         error("Duplicate requirement " .. requirement_type .. " on object " .. self.printable_name)
     end
-    depends[requirement_type] = requirement
+    requirements[requirement_type] = requirement
     ---@diagnostic disable-next-line: invisible
     requirement:add_reverse_dependent(self)
 
@@ -53,9 +59,34 @@ end
 
 ---@package
 ---@param fulfilled RequirementNode
-function object_node:add_reverse_disjunctive_fulfilled(fulfilled)
-    local reverse_disjunctive_depends = self.reverse_disjunctive_depends
-    reverse_disjunctive_depends[#reverse_disjunctive_depends+1] = fulfilled
+function object_node:add_fulfiller(fulfilled)
+    local can_fulfil = self.can_fulfil
+    can_fulfil[#can_fulfil+1] = fulfilled
+end
+
+function object_node:has_no_more_dependencies()
+    return self.nr_requirements == self.nr_fulfilled_requirements
+end
+
+---@param requirement string
+function object_node:on_fulfil_requirement(requirement)
+    local fulfilled_requirements = self.fulfilled_requirements
+    if fulfilled_requirements[requirement] then
+        return false
+    end
+    fulfilled_requirements[requirement] = true
+    return true
+end
+
+function object_node:on_node_becomes_independent()
+    local result = {}
+    for _, requirement in pairs(self.can_fulfil) do
+        local newly_independent_nodes = requirement:try_add_canonical_fulfiller(self)
+        for _, newly_independent_node in pairs(newly_independent_nodes) do
+            result[#result+1] = newly_independent_node
+        end
+    end
+    return result
 end
 
 return object_node

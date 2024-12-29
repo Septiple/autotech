@@ -78,7 +78,7 @@ function object_node_functor:add_fulfiller_for_object_requirement(object, object
     end
 
     local target_node = object_nodes:find_object_node(object_descriptor)
-    local requirement_node = target_node.depends[requirement]
+    local requirement_node = target_node.requirements[requirement]
     requirement_node:add_fulfiller(object)
 end
 
@@ -118,7 +118,7 @@ function object_node_functor:add_fulfiller_to_productlike_object(fulfiller, prod
     function inner_function(productlike)
         local type_of_productlike = productlike.type == "item" and object_types.item or object_types.fluid
         local descriptor = object_node_descriptor:new(productlike.name, type_of_productlike)
-        object_nodes:find_object_node(descriptor).depends[target_requirement_type]:add_fulfiller(fulfiller)
+        object_nodes:find_object_node(descriptor).requirements[target_requirement_type]:add_fulfiller(fulfiller)
     end
 
     if type(productlike_possibly_table) == "table" then

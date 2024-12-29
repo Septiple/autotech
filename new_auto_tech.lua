@@ -171,12 +171,12 @@ end
 function auto_tech:linearise_recipe_graph()
     local verbose_logging = self.configuration.verbose_logging
     local q = deque.new()
-    for _, node_type in pairs(self.nodes_per_node_type) do
-        for _, node in pairs(node_type) do
+    for _, nodes in pairs(self.object_nodes.nodes) do
+        for _, node in pairs(nodes) do
             if node:has_no_more_dependencies() then
                 q:push_right(node)
                 if verbose_logging then
-                    log("Node " .. node.printable_name .. " starts with no dependencies.")
+                    log("Object " .. node.printable_name .. " starts with no dependencies.")
                 end
             end
         end
@@ -188,7 +188,7 @@ function auto_tech:linearise_recipe_graph()
             log("Node " .. next.printable_name .. " is next in the linearisation.")
         end
 
-        local newly_independent_nodes = next:release_dependents()
+        local newly_independent_nodes = next:on_node_becomes_independent()
         if verbose_logging then
             for _, node in pairs(newly_independent_nodes) do
                 log("After releasing " .. next.printable_name .. " node " .. node.printable_name .. " is now independent.")
@@ -200,10 +200,10 @@ function auto_tech:linearise_recipe_graph()
         end
     end
 
-    for _, node_type in pairs(self.nodes_per_node_type) do
-        for _, node in pairs(node_type) do
+    for _, nodes in pairs(self.object_nodes.nodes) do
+        for _, node in pairs(nodes) do
             if not node:has_no_more_dependencies() then
-                log("Node " .. node.printable_name .. " still has unresolved dependencies: " .. node:print_dependencies())
+                log("Node " .. node.printable_name .. " still has unresolved dependencies: ")-- .. node:print_dependencies())
             end
         end
     end
