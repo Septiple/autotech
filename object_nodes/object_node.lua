@@ -10,7 +10,7 @@
 ---@field nr_requirements int
 ---@field fulfilled_requirements table<string, boolean>
 ---@field nr_fulfilled_requirements int
----@field can_fulfil RequirementNode[]
+---@field this_can_fulfil RequirementNode[]
 local object_node = {}
 object_node.__index = object_node
 
@@ -30,7 +30,7 @@ function object_node:new(object, descriptor, object_nodes, configuration)
 
     result.requirements = {}
     result.nr_requirements = 0
-    result.can_fulfil = {}
+    result.this_can_fulfil = {}
     result.fulfilled_requirements = {}
     result.nr_fulfilled_requirements = 0
 
@@ -52,7 +52,7 @@ function object_node:add_requirement(requirement)
     end
     requirements[requirement_type] = requirement
     ---@diagnostic disable-next-line: invisible
-    requirement:add_reverse_dependent(self)
+    requirement:add_requiring_node(self)
 
     log("Object " .. self.printable_name .. " has the requirement " .. requirement.printable_name)
 end
@@ -60,11 +60,11 @@ end
 ---@package
 ---@param fulfilled RequirementNode
 function object_node:add_fulfiller(fulfilled)
-    local can_fulfil = self.can_fulfil
-    can_fulfil[#can_fulfil+1] = fulfilled
+    local this_can_fulfil = self.this_can_fulfil
+    this_can_fulfil[#this_can_fulfil+1] = fulfilled
 end
 
-function object_node:has_no_more_dependencies()
+function object_node:has_no_more_unfulfilled_requirements()
     return self.nr_requirements == self.nr_fulfilled_requirements
 end
 
@@ -80,7 +80,7 @@ end
 
 function object_node:on_node_becomes_independent()
     local result = {}
-    for _, requirement in pairs(self.can_fulfil) do
+    for _, requirement in pairs(self.this_can_fulfil) do
         local newly_independent_nodes = requirement:try_add_canonical_fulfiller(self)
         for _, newly_independent_node in pairs(newly_independent_nodes) do
             result[#result+1] = newly_independent_node

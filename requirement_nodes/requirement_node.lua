@@ -12,8 +12,8 @@ local requirement_descriptor = require "requirement_nodes.requirement_descriptor
 ---@field descriptor RequirementNodeDescriptor
 ---@field printable_name string
 ---@field configuration Configuration
----@field disjunctive_depends ObjectNode[]
----@field reverse_depends ObjectNode[]
+---@field nodes_that_can_fulfil_this ObjectNode[]
+---@field nodes_that_require_this ObjectNode[]
 ---@field canonical_fulfiller ObjectNode
 local requirement_node = {}
 requirement_node.__index = requirement_node
@@ -33,8 +33,8 @@ function requirement_node:new(descriptor, requirement_nodes, configuration)
     result.printable_name = descriptor.printable_name
     result.configuration = configuration
 
-    result.disjunctive_depends = {}
-    result.reverse_depends = {}
+    result.nodes_that_can_fulfil_this = {}
+    result.nodes_that_require_this = {}
     result.canonical_fulfiller = nil
 
     requirement_nodes:add_requirement_node(result)
@@ -76,8 +76,8 @@ end
 
 ---@param fulfiller ObjectNode
 function requirement_node:add_fulfiller(fulfiller)
-    local disjunctive_depends = self.disjunctive_depends
-    disjunctive_depends[#disjunctive_depends+1] = fulfiller
+    local nodes_that_can_fulfil_this = self.nodes_that_can_fulfil_this
+    nodes_that_can_fulfil_this[#nodes_that_can_fulfil_this+1] = fulfiller
     ---@diagnostic disable-next-line: invisible
     fulfiller:add_fulfiller(self)
 
@@ -86,9 +86,9 @@ end
 
 ---@package
 ---@param dependent ObjectNode
-function requirement_node:add_reverse_dependent(dependent)
-    local reverse_depends = self.reverse_depends
-    reverse_depends[#reverse_depends+1] = dependent
+function requirement_node:add_requiring_node(dependent)
+    local nodes_that_require_this = self.nodes_that_require_this
+    nodes_that_require_this[#nodes_that_require_this+1] = dependent
 end
 
 ---@param fulfiller ObjectNode
@@ -99,7 +99,7 @@ function requirement_node:try_add_canonical_fulfiller(fulfiller)
     self.canonical_fulfiller = fulfiller
 
     local result = {}
-    for _, target in pairs(self.reverse_depends) do
+    for _, target in pairs(self.nodes_that_require_this) do
         local target_now_is_independent = target:on_fulfil_requirement(self.descriptor.name)
         if target_now_is_independent then
             result[#result+1] = target
