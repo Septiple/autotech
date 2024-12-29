@@ -51,6 +51,7 @@ function object_node:add_requirement(requirement)
         error("Duplicate requirement " .. requirement_type .. " on object " .. self.printable_name)
     end
     requirements[requirement_type] = requirement
+    self.nr_requirements = self.nr_requirements + 1
     ---@diagnostic disable-next-line: invisible
     requirement:add_requiring_node(self)
 
@@ -75,6 +76,7 @@ function object_node:on_fulfil_requirement(requirement)
         return false
     end
     fulfilled_requirements[requirement] = true
+    self.nr_fulfilled_requirements = self.nr_fulfilled_requirements + 1
     return true
 end
 
