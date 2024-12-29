@@ -173,7 +173,7 @@ function auto_tech:linearise_recipe_graph()
     local q = deque.new()
     for _, nodes in pairs(self.object_nodes.nodes) do
         for _, node in pairs(nodes) do
-            if node:has_no_more_dependencies() then
+            if node:has_no_more_unfulfilled_requirements() then
                 q:push_right(node)
                 if verbose_logging then
                     log("Object " .. node.printable_name .. " starts with no dependencies.")
@@ -202,7 +202,7 @@ function auto_tech:linearise_recipe_graph()
 
     for _, nodes in pairs(self.object_nodes.nodes) do
         for _, node in pairs(nodes) do
-            if not node:has_no_more_dependencies() then
+            if not node:has_no_more_unfulfilled_requirements() then
                 log("Node " .. node.printable_name .. " still has unresolved dependencies: ")-- .. node:print_dependencies())
             end
         end
