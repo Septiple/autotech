@@ -75,18 +75,61 @@ function object_node_functor:add_fulfiller_for_typed_requirement(object, name, s
 end
 
 ---@param object ObjectNode
----@param name string
+---@param nameOrTable any
 ---@param object_type ObjectType
 ---@param requirement any
 ---@param object_nodes ObjectNodeStorage
-function object_node_functor:add_fulfiller_for_object_requirement(object, name, object_type, requirement, object_nodes)
-    if name == nil then
+---@param optional_inner_name string|nil
+function object_node_functor:add_fulfiller_for_object_requirement(object, nameOrTable, object_type, requirement, object_nodes, optional_inner_name)
+    
+    -- This function aims to work with a lot of different formats:
+    -- - nameOrTable is an item/entity/whatever directly
+    -- - nameOrTable[optional_inner_name] is an item directly
+    -- - nameOrTable is a table of items
+    -- - nameOrTable is a table of objects, and object[optional_inner_name] is an item
+
+    if nameOrTable == nil then
         return
     end
-    local object_descriptor = object_node_descriptor:new(name, object_type)
-    local target_node = object_nodes:find_object_node(object_descriptor)
-    local requirement_node = target_node.requirements[requirement]
-    requirement_node:add_fulfiller(object)
+    local function actualWork(name)
+        local object_descriptor = object_node_descriptor:new(name, object_type)
+        local target_node = object_nodes:find_object_node(object_descriptor)
+        local requirement_node = target_node.requirements[requirement]
+        requirement_node:add_fulfiller(object)
+    end
+    function checkInnerName(actual_node_name)
+        if optional_inner_name == nil then
+            if type(actual_node_name) == "table" then
+                actualWork(actual_node_name["name"])
+            else
+                actualWork(actual_node_name)
+            end
+        else
+            actualWork(actual_node_name[optional_inner_name])
+        end
+    end
+    function doCallOnObject()
+        checkInnerName(nameOrTable)
+    end
+    function doCallOnTable()
+        for _, actual_node_name in pairs(nameOrTable) do
+            checkInnerName(actual_node_name)
+        end
+    end
+    if type(nameOrTable) == "table" then
+        if optional_inner_name ~= nil then
+            -- have to distinguish between { item='fish', count=5 } and a table of such entries
+            if nameOrTable[optional_inner_name] == nil then
+                doCallOnTable()
+            else
+                doCallOnObject()
+            end
+        else
+            doCallOnTable()
+        end
+    else
+        doCallOnObject()
+    end
 end
 
 ---@param object ObjectNode

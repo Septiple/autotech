@@ -1,5 +1,4 @@
 local object_types = require "object_nodes.object_types"
-local object_node_descriptor = require "object_nodes.object_node_descriptor"
 local object_node_functor = require "object_nodes.object_node_functor"
 local requirement_node = require "requirement_nodes.requirement_node"
 local requirement_types = require "requirement_nodes.requirement_types"
@@ -14,19 +13,14 @@ function (object, requirement_nodes, object_nodes)
     local item = object.object
     object_node_functor:add_fulfiller_for_object_requirement(object, item.place_result, object_types.entity, entity_requirements.instantiate, object_nodes)
     object_node_functor:add_fulfiller_for_typed_requirement(object, item.fuel_category, requirement_types.fuel_category, requirement_nodes)
+
+    object_node_functor:add_fulfiller_for_object_requirement(object, item.burnt_result, object_types.item, item_requirements.create, object_nodes)
+    object_node_functor:add_fulfiller_for_object_requirement(object, item.spoil_result, object_types.item, item_requirements.create, object_nodes)
+    object_node_functor:add_fulfiller_for_object_requirement(object, item.plant_result, object_types.entity, entity_requirements.instantiate, object_nodes)
+    object_node_functor:add_fulfiller_for_object_requirement(object, item.rocket_launch_products, object_types.item, item_requirements.create, object_nodes)
+
 end)
 return item_functor
-
-
--- local item_node = object_node_base:create_object_class("item", node_types.item_node, function(self, nodes)
---     local item = self.object
-    
---     self:add_disjunctive_dependent(nodes, node_types.entity_node, item.place_result, "place result", entity_verbs.instantiate)
---     self:add_disjunctive_dependent(nodes, node_types.fuel_category_node, item.fuel_category, "fuel category", fuel_category_verbs.instantiate)
-
---     self:add_disjunctive_dependent(nodes, node_types.item_node, item.burnt_result, "burnt result", item_verbs.create)
---     self:add_disjunctive_dependent(nodes, node_types.item_node, item.spoil_result, "spoil result", item_verbs.create)
---     self:add_disjunctive_dependent(nodes, node_types.entity_node, item.plant_result, "plant result", entity_verbs.instantiate)
 
 --     self:add_disjunctive_dependent(nodes, node_types.item_node, item.rocket_launch_products, "rocket launch product", item_verbs.create, "name")
 --     if item.rocket_launch_products then
