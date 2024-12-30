@@ -44,4 +44,8 @@ function requirement_node_descriptor:new_object_dependent_requirement_descriptor
     return result
 end
 
+function requirement_node_descriptor:valid()
+    return self.name ~= nil
+end
+
 return requirement_node_descriptor

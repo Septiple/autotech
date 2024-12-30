@@ -53,30 +53,37 @@ end
 -- These are static helper functions
 
 ---@param object ObjectNode
----@param requirement_type RequirementType
+---@param source RequirementType
 ---@param requirement_nodes RequirementNodeStorage
-function object_node_functor:add_fulfiller_for_independent_requirement(object, requirement_type, requirement_nodes)
-    local requirement = requirement_nodes[requirement_type][requirement_type]
-    requirement:add_fulfiller(object)
+function object_node_functor:add_fulfiller_for_independent_requirement(object, source, requirement_nodes)
+    local descriptor = requirement_descriptor:new_independent_requirement_descriptor(source)
+    local node = requirement_nodes:find_requirement_node(descriptor)
+    node:add_fulfiller(object)
 end
 
 ---@param object ObjectNode
----@param requirement_type RequirementType
+---@param name string
+---@param source RequirementType
 ---@param requirement_nodes RequirementNodeStorage
-function object_node_functor:add_fulfiller_for_typed_requirement(object, requirement_type, requirement_nodes)
-    local requirement = requirement_nodes[requirement_type][requirement_type]
-    requirement:add_fulfiller(object)
-end
-
----@param object ObjectNode
----@param object_descriptor ObjectNodeDescriptor
----@param requirement any
----@param object_nodes ObjectNodeStorage
-function object_node_functor:add_fulfiller_for_object_requirement(object, object_descriptor, requirement, object_nodes)
-    if not object_descriptor:valid() then
+function object_node_functor:add_fulfiller_for_typed_requirement(object, name, source, requirement_nodes)
+    if name == nil then
         return
     end
+    local descriptor = requirement_descriptor:new_typed_requirement_descriptor(name, source)
+    local node = requirement_nodes:find_requirement_node(descriptor)
+    node:add_fulfiller(object)
+end
 
+---@param object ObjectNode
+---@param name string
+---@param object_type ObjectType
+---@param requirement any
+---@param object_nodes ObjectNodeStorage
+function object_node_functor:add_fulfiller_for_object_requirement(object, name, object_type, requirement, object_nodes)
+    if name == nil then
+        return
+    end
+    local object_descriptor = object_node_descriptor:new(name, object_type)
     local target_node = object_nodes:find_object_node(object_descriptor)
     local requirement_node = target_node.requirements[requirement]
     requirement_node:add_fulfiller(object)
