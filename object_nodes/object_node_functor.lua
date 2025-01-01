@@ -79,7 +79,7 @@ end
 ---@param object_type ObjectType
 ---@param requirement any
 ---@param object_nodes ObjectNodeStorage
----@param optional_inner_name string|nil
+---@param optional_inner_name? string|nil
 function object_node_functor:add_fulfiller_for_object_requirement(object, nameOrTable, object_type, requirement, object_nodes, optional_inner_name)
     
     -- This function aims to work with a lot of different formats:
