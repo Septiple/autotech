@@ -1,31 +1,47 @@
+local item_requirements = require "requirements.item_requirements"
 local object_types = require "object_nodes.object_types"
 local object_node_functor = require "object_nodes.object_node_functor"
 local requirement_node = require "requirement_nodes.requirement_node"
-local requirement_types = require "requirement_nodes.requirement_types"
+local recipe_requirements = require "requirements.recipe_requirements"
 local technology_requirements = require "requirements.technology_requirements"
+local planet_requirements = require "requirements.planet_requirements"
+
+---@param prerequisite string
+local function prerequisite_name(prerequisite)
+    return technology_requirements.prerequisite .. ": " .. prerequisite
+end
 
 local technology_functor = object_node_functor:new(object_types.technology,
 function (object, requirement_nodes)
+    local tech = object.object
+
     requirement_node:add_new_object_dependent_requirement(technology_requirements.enable, object, requirement_nodes, object.configuration)
     requirement_node:add_new_object_dependent_requirement(technology_requirements.researched_with, object, requirement_nodes, object.configuration)
+
+    for _, prerequisite in pairs(tech.prerequisites or {}) do
+        requirement_node:add_new_object_dependent_requirement(prerequisite_name(prerequisite), object, requirement_nodes, object.configuration)
+    end
 end,
 function (object, requirement_nodes, object_nodes)
+    local tech = object.object
+
+    for _, prerequisite in pairs(tech.prerequisites or {}) do
+        object_node_functor:reverse_add_fulfiller_for_object_requirement(object, prerequisite_name(prerequisite), prerequisite, object_types.technology, object_nodes)
+    end
+
+    for _, modifier in pairs(tech.effects or {}) do
+        if modifier.type == "give-item" then
+            object_node_functor:add_fulfiller_for_object_requirement(object, modifier.item, object_types.item, item_requirements.create, object_nodes)
+        elseif modifier.type == "unlock-recipe" then
+            object_node_functor:add_fulfiller_for_object_requirement(object, modifier.recipe, object_types.recipe, recipe_requirements.enable, object_nodes)
+        elseif modifier.type == "unlock-space-location" then
+            object_node_functor:add_fulfiller_for_object_requirement(object, modifier.space_location, object_types.planet, planet_requirements.visit, object_nodes)
+        end
+    end
 end)
 return technology_functor
 
 -- local tech = self.object
-
--- self:add_dependency(nodes, node_types.technology_node, tech.prerequisites, "prerequisite", technology_verbs.enable)
-
--- for _, modifier in pairs(tech.effects or {}) do
---     if modifier.type == "give-item" then
---         self:add_disjunctive_dependent(nodes, node_types.item_node, modifier.item, "given by tech", item_verbs.create)
---     elseif modifier.type == "unlock-recipe" then
---         self:add_disjunctive_dependent(nodes, node_types.recipe_node, modifier.recipe, "enabled by tech", recipe_verbs.enable)
---     elseif modifier.type == "unlock-space-location" then
---         self:add_disjunctive_dependent(nodes, node_types.planet_node, modifier.space_location, "unlocked by tech", planet_verbs.visit)
---     end
--- end
 
 -- if tech.unit then
 --     for _, ingredient in pairs(tech.unit.ingredients or {}) do

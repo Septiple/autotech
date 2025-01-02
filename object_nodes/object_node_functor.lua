@@ -74,13 +74,25 @@ function object_node_functor:add_fulfiller_for_typed_requirement(object, name, s
     node:add_fulfiller(object)
 end
 
----@param object ObjectNode
+---@param requirer ObjectNode
+---@param requirement string
+---@param fulfiller_name string
+---@param fulfiller_type ObjectType
+---@param object_nodes ObjectNodeStorage
+function object_node_functor:reverse_add_fulfiller_for_object_requirement(requirer, requirement, fulfiller_name, fulfiller_type, object_nodes)
+    local node = requirer.requirements[requirement]
+    local descriptor = object_node_descriptor:new(fulfiller_name, fulfiller_type)
+    local fulfiller = object_nodes:find_object_node(descriptor)
+    node:add_fulfiller(fulfiller)
+end
+
+---@param fulfiller ObjectNode
 ---@param nameOrTable any
 ---@param object_type ObjectType
 ---@param requirement any
 ---@param object_nodes ObjectNodeStorage
 ---@param optional_inner_name? string|nil
-function object_node_functor:add_fulfiller_for_object_requirement(object, nameOrTable, object_type, requirement, object_nodes, optional_inner_name)
+function object_node_functor:add_fulfiller_for_object_requirement(fulfiller, nameOrTable, object_type, requirement, object_nodes, optional_inner_name)
     
     -- This function aims to work with a lot of different formats:
     -- - nameOrTable is an item/entity/whatever directly
@@ -95,7 +107,7 @@ function object_node_functor:add_fulfiller_for_object_requirement(object, nameOr
         local object_descriptor = object_node_descriptor:new(name, object_type)
         local target_node = object_nodes:find_object_node(object_descriptor)
         local requirement_node = target_node.requirements[requirement]
-        requirement_node:add_fulfiller(object)
+        requirement_node:add_fulfiller(fulfiller)
     end
     function checkInnerName(actual_node_name)
         if optional_inner_name == nil then
