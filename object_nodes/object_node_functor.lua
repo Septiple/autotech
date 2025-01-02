@@ -86,6 +86,19 @@ function object_node_functor:reverse_add_fulfiller_for_object_requirement(requir
     node:add_fulfiller(fulfiller)
 end
 
+---@param requirer ObjectNode
+---@param requirement_prefix string
+---@param table any[]
+---@param fulfiller_type ObjectType
+---@param object_nodes ObjectNodeStorage
+---@param optional_inner_index? any
+function object_node_functor:reverse_add_fulfiller_for_object_requirement_table(requirer, requirement_prefix, table, fulfiller_type, object_nodes, optional_inner_index)
+    for _, entry in pairs(table or {}) do
+        local actualEntry = optional_inner_index and entry[optional_inner_index] or entry
+        object_node_functor:reverse_add_fulfiller_for_object_requirement(requirer, requirement_prefix .. ": " .. actualEntry, actualEntry, fulfiller_type, object_nodes)
+    end
+end
+
 ---@param fulfiller ObjectNode
 ---@param nameOrTable any
 ---@param object_type ObjectType

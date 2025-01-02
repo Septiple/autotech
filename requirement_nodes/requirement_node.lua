@@ -74,6 +74,20 @@ function requirement_node:add_new_object_dependent_requirement(name, source_obje
     return new_requirement
 end
 
+---@param table any[]
+---@param requirement_prefix string
+---@param source_object ObjectNode
+---@param requirement_nodes RequirementNodeStorage
+---@param configuration Configuration
+---@param optional_inner_index? any
+---@return RequirementNode
+function requirement_node:add_new_object_dependent_requirement_table(table, requirement_prefix, source_object, requirement_nodes, configuration, optional_inner_index)
+    for _, entry in pairs(table or {}) do
+        local actualEntry = optional_inner_index and entry[optional_inner_index] or entry
+        requirement_node:add_new_object_dependent_requirement(requirement_prefix .. ": " .. actualEntry, source_object, requirement_nodes, configuration)
+    end
+end
+
 ---@param fulfiller ObjectNode
 function requirement_node:add_fulfiller(fulfiller)
     local nodes_that_can_fulfil_this = self.nodes_that_can_fulfil_this

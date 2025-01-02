@@ -6,17 +6,22 @@ local requirement_types = require "requirement_nodes.requirement_types"
 local item_requirements = require "requirements.item_requirements"
 local recipe_requirements = require "requirements.recipe_requirements"
 
+local function ingredientList(ingredients)
+    local nr_ingredients = ingredients and #ingredients or 0
+    local result = {}
+    for i = 1, nr_ingredients do
+        result[i] = i
+    end
+    return result
+end
+
 local recipe_functor = object_node_functor:new(object_types.recipe,
 function (object, requirement_nodes)
     requirement_node:add_new_object_dependent_requirement(recipe_requirements.enable, object, requirement_nodes, object.configuration)
 
     local recipe = object.object
-    if recipe.ingredients ~= nil then
-        local nr_ingredients = #recipe.ingredients
-        for i = 1, nr_ingredients do
-            requirement_node:add_new_object_dependent_requirement(recipe_requirements.ingredient .. i, object, requirement_nodes, object.configuration)
-        end
-    end
+
+    requirement_node:add_new_object_dependent_requirement_table(ingredientList(recipe.ingredients), recipe_requirements.ingredient, object, requirement_nodes, object.configuration)
 end,
 function (object, requirement_nodes, object_nodes)
     local recipe = object.object
@@ -25,7 +30,7 @@ function (object, requirement_nodes, object_nodes)
 
     local i = 1
     for _, ingredient in pairs(recipe.ingredients or {}) do
-        object_node_functor:add_productlike_fulfiller(object.requirements[recipe_requirements.ingredient .. i], ingredient, object_nodes)
+        object_node_functor:add_productlike_fulfiller(object.requirements[recipe_requirements.ingredient .. ": " .. i], ingredient, object_nodes)
         i = i + 1
     end
 
