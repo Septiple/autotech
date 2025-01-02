@@ -18,6 +18,9 @@ local recipe_functor = require "functors.recipe_functor"
 local technology_functor = require "functors.technology_functor"
 local tile_functor = require "functors.tile_functor"
 
+local item_requirements = require "requirements.item_requirements"
+local planet_requirements = require "requirements.planet_requirements"
+
 ---@type table<ObjectType, ObjectNodeFunctor>
 local functor_map = {}
 functor_map[object_types.entity] = entity_functor
@@ -79,6 +82,7 @@ function auto_tech:run()
     self:run_phase(function()
         self:run_phase(self.create_nodes, "recipe graph node creation")
         self:run_phase(self.link_nodes, "recipe graph link creation")
+        self:run_phase(self.run_custom_mod_dependencies, "custom mod dependencies")
         self:run_phase(self.linearise_recipe_graph, "recipe graph linearisation")
         self:run_phase(self.verify_end_tech_reachable, "verify end tech reachable")
         self:run_phase(self.construct_tech_graph, "constructing tech graph")
@@ -90,7 +94,7 @@ function auto_tech:run()
 end
 
 function auto_tech:create_nodes()
-    object_node:new({name="start"}, object_node_descriptor:unique_node(object_types.start), self.object_nodes, self.configuration)
+    self.start_node = object_node:new({name="start"}, object_node_descriptor:unique_node(object_types.start), self.object_nodes, self.configuration)
     requirement_node:new_independent_requirement(requirement_types.electricity, self.requirement_nodes, self.configuration)
     requirement_node:new_independent_requirement(requirement_types.fluid_with_fuel_value, self.requirement_nodes, self.configuration)
     requirement_node:new_independent_requirement(requirement_types.heat, self.requirement_nodes, self.configuration)
@@ -166,6 +170,27 @@ function auto_tech:link_nodes()
         end
         functor_map[object_type]:register_dependencies(object, self.requirement_nodes, self.object_nodes)
     end)
+end
+
+function auto_tech:run_custom_mod_dependencies()
+    -- For now, this just adds vanilla startup stuff
+    local starting_items = {
+        "iron-plate",
+        "wood",
+        "pistol",
+        "firearm-magazine",
+        "burner-mining-drill",
+        "stone-furnace",
+    }
+
+    for _, item in pairs(starting_items) do
+        item_functor:add_fulfiller_for_object_requirement(self.start_node, item, object_types.item, item_requirements.create, self.object_nodes)
+    end
+
+    --TODO: figure out if this is in the raw data somehow
+    item_functor:add_fulfiller_for_typed_requirement(self.start_node, "crafting", requirement_types.recipe_category, self.requirement_nodes)
+    item_functor:add_fulfiller_for_typed_requirement(self.start_node, "basic-solid", requirement_types.resource_category, self.requirement_nodes)
+    item_functor:add_fulfiller_for_object_requirement(self.start_node, "nauvis", object_types.planet, planet_requirements.visit, self.object_nodes)
 end
 
 function auto_tech:linearise_recipe_graph()
