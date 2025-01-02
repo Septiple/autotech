@@ -62,16 +62,27 @@ function object_node_functor:add_fulfiller_for_independent_requirement(object, s
 end
 
 ---@param object ObjectNode
----@param name string
+---@param nameOrTable string
 ---@param source RequirementType
 ---@param requirement_nodes RequirementNodeStorage
-function object_node_functor:add_fulfiller_for_typed_requirement(object, name, source, requirement_nodes)
-    if name == nil then
+function object_node_functor:add_fulfiller_for_typed_requirement(object, nameOrTable, source, requirement_nodes)
+    if nameOrTable == nil then
         return
     end
-    local descriptor = requirement_descriptor:new_typed_requirement_descriptor(name, source)
-    local node = requirement_nodes:find_requirement_node(descriptor)
-    node:add_fulfiller(object)
+
+    local function actually_add_fulfiller(name)
+        local descriptor = requirement_descriptor:new_typed_requirement_descriptor(name, source)
+        local node = requirement_nodes:find_requirement_node(descriptor)
+        node:add_fulfiller(object)
+    end
+
+    if type(nameOrTable) == "table" then
+        for _, name in pairs(nameOrTable) do
+            actually_add_fulfiller(name)
+        end
+    else
+        actually_add_fulfiller(nameOrTable)
+    end
 end
 
 ---@param requirer ObjectNode

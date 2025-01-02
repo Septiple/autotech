@@ -4,12 +4,21 @@ local requirement_node = require "requirement_nodes.requirement_node"
 local requirement_types = require "requirement_nodes.requirement_types"
 local item_requirements = require "requirements.item_requirements"
 local entity_requirements = require "requirements.entity_requirements"
+local fluid_requirements = require "requirements.fluid_requirements"
 
 local entity_functor = object_node_functor:new(object_types.entity,
 function (object, requirement_nodes)
     requirement_node:add_new_object_dependent_requirement(entity_requirements.instantiate, object, requirement_nodes, object.configuration)
 end,
 function (object, requirement_nodes, object_nodes)
+    local entity = object.object
+    if entity.type == "resource" then
+        object_node_functor:add_typed_requirement_to_object(object, entity.category or "basic-solid", requirement_types.resource_category, requirement_nodes)
+    elseif entity.type == "mining-drill" then
+        object_node_functor:add_fulfiller_for_typed_requirement(object, entity.resource_categories, requirement_types.resource_category, requirement_nodes)
+    elseif entity.type == "offshore-pump" then
+        object_node_functor:add_fulfiller_for_object_requirement(object, entity.fluid, object_types.fluid, fluid_requirements.create, object_nodes)
+    end
 end)
 return entity_functor
 
@@ -48,14 +57,6 @@ return entity_functor
 
 -- local entity_node = object_node_base:create_object_class("entity", node_types.entity_node, function(self, nodes)
 --     local entity = self.object
-
---     if entity.type == "resource" then
---         self:add_dependency(nodes, node_types.resource_category_node, entity.category or "basic-solid", "resource category", "mine")
---     elseif entity.type == "mining-drill" then
---         self:add_disjunctive_dependent(nodes, node_types.resource_category_node, entity.resource_categories, "can mine", resource_category_verbs.instantiate)
---     elseif entity.type == "offshore-pump" then
---         self:add_disjunctive_dependent(nodes, node_types.fluid_node, entity.fluid, "pumps", fluid_verbs.create)
---     end
 
 --     local minable = entity.minable
 --     if minable ~= nil then

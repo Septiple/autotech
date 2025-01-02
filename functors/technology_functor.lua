@@ -6,16 +6,6 @@ local recipe_requirements = require "requirements.recipe_requirements"
 local technology_requirements = require "requirements.technology_requirements"
 local planet_requirements = require "requirements.planet_requirements"
 
----@param prerequisite string
-local function prerequisite_name(prerequisite)
-    return technology_requirements.prerequisite .. ": " .. prerequisite
-end
-
----@param science_pack string
-local function science_pack_name(science_pack)
-    return technology_requirements.science_pack .. ": " .. science_pack
-end
-
 local technology_functor = object_node_functor:new(object_types.technology,
 function (object, requirement_nodes)
     local tech = object.object
