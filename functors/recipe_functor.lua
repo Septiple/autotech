@@ -34,7 +34,7 @@ function (object, requirement_nodes, object_nodes)
         i = i + 1
     end
 
-    object_node_functor:add_fulfiller_to_productlike_object(object, recipe.results, item_requirements.create, object_nodes)
+    object_node_functor:add_fulfiller_to_productlike_object(object, recipe.results or recipe.result, object_nodes)
 
     if recipe.enabled ~= false then
         object.requirements[recipe_requirements.enable]:add_fulfiller(object_nodes:find_object_node(object_node_descriptor:unique_node(object_types.start)))

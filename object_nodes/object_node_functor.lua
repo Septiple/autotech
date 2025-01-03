@@ -3,6 +3,8 @@
 local object_node_descriptor = require "object_nodes.object_node_descriptor"
 local object_types = require "object_nodes.object_types"
 local requirement_descriptor = require "requirement_nodes.requirement_descriptor"
+local item_requirements = require "requirements.item_requirements"
+local fluid_requirements = require "requirements.fluid_requirements"
 
 ---Defines how to register requirements and dependencies for a specific object type.
 ---@class ObjectNodeFunctor
@@ -194,17 +196,17 @@ end
 
 ---@param fulfiller ObjectNode
 ---@param productlike_possibly_table any
----@param target_requirement_type string
 ---@param object_nodes ObjectNodeStorage
-function object_node_functor:add_fulfiller_to_productlike_object(fulfiller, productlike_possibly_table, target_requirement_type, object_nodes)
+function object_node_functor:add_fulfiller_to_productlike_object(fulfiller, productlike_possibly_table, object_nodes)
     if productlike_possibly_table == nil then
         return
     end
 
     function inner_function(productlike)
-        local type_of_productlike = productlike.type == "item" and object_types.item or object_types.fluid
-        local descriptor = object_node_descriptor:new(productlike.name, type_of_productlike)
-        object_nodes:find_object_node(descriptor).requirements[target_requirement_type]:add_fulfiller(fulfiller)
+        local type_of_productlike = productlike.type and (productlike.type == "item" and object_types.item or object_types.fluid) or object_types.item
+        local type_of_requirement = productlike.type and (productlike.type == "item" and item_requirements.create or fluid_requirements.create) or item_requirements.create
+        local descriptor = object_node_descriptor:new(productlike.name or productlike, type_of_productlike)
+        object_nodes:find_object_node(descriptor).requirements[type_of_requirement]:add_fulfiller(fulfiller)
     end
 
     if type(productlike_possibly_table) == "table" then

@@ -8,7 +8,15 @@ local fluid_requirements = require "requirements.fluid_requirements"
 
 local entity_functor = object_node_functor:new(object_types.entity,
 function (object, requirement_nodes)
+    local entity = object.object
     requirement_node:add_new_object_dependent_requirement(entity_requirements.instantiate, object, requirement_nodes, object.configuration)
+
+    local minable = entity.minable
+    if minable ~= nil then
+        if minable.required_fluid then
+            requirement_node:add_new_object_dependent_requirement(entity_requirements.required_fluid, object, requirement_nodes, object.configuration)
+        end
+    end
 end,
 function (object, requirement_nodes, object_nodes)
     local entity = object.object
@@ -18,6 +26,15 @@ function (object, requirement_nodes, object_nodes)
         object_node_functor:add_fulfiller_for_typed_requirement(object, entity.resource_categories, requirement_types.resource_category, requirement_nodes)
     elseif entity.type == "offshore-pump" then
         object_node_functor:add_fulfiller_for_object_requirement(object, entity.fluid, object_types.fluid, fluid_requirements.create, object_nodes)
+    end
+    
+    local minable = entity.minable
+    if minable ~= nil then
+        --self:add_dependency(nodes, node_types.fluid_node, minable.required_fluid, "required fluid", "mine")
+        object_node_functor:add_fulfiller_to_productlike_object(object, minable.results or minable.result, object_nodes)
+        if minable.required_fluid then
+            object_node_functor:reverse_add_fulfiller_for_object_requirement(object, entity_requirements.required_fluid, minable.required_fluid, object_types.fluid, object_nodes)
+        end
     end
 end)
 return entity_functor
@@ -57,12 +74,6 @@ return entity_functor
 
 -- local entity_node = object_node_base:create_object_class("entity", node_types.entity_node, function(self, nodes)
 --     local entity = self.object
-
---     local minable = entity.minable
---     if minable ~= nil then
---         self:add_dependency(nodes, node_types.fluid_node, minable.required_fluid, "required fluid", "mine")
---         self:add_productlike_disjunctive_dependent(nodes, minable.result, minable.results, item_verbs.create)
---     end
 
 --     self:add_disjunctive_dependent(nodes, node_types.entity_node, entity.remains_when_mined, "remains when mined", entity_verbs.instantiate)
 --     self:add_disjunctive_dependency(nodes, node_types.item_node, entity.placeable_by, "placeable by", entity_verbs.instantiate, "item")
