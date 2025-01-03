@@ -1,7 +1,6 @@
 ---@enum RequirementType
 local requirement_types = {
     ammo_category = "ammo_category",
-    autoplace_control = "autoplace_control",
     electricity = "electricity",
     equipment_grid = "equipment_grid",
     fluid_fuel = "fluid_fuel",

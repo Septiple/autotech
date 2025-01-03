@@ -1,5 +1,6 @@
 ---@enum ObjectType
 local object_types = {
+    autoplace_control = "autoplace_control",
     entity = "entity",
     fluid = "fluid",
     item = "item",

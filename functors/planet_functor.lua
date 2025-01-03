@@ -2,6 +2,7 @@ local object_types = require "object_nodes.object_types"
 local object_node_descriptor = require "object_nodes.object_node_descriptor"
 local object_node_functor = require "object_nodes.object_node_functor"
 local requirement_node = require "requirement_nodes.requirement_node"
+local autoplace_control_requirements = require "requirements.autoplace_control_requirements"
 local planet_requirements = require "requirements.planet_requirements"
 
 local planet_functor = object_node_functor:new(object_types.planet,
@@ -25,23 +26,27 @@ function (object, requirement_nodes, object_nodes)
 
     local mgs = planet.map_gen_settings
     if not mgs then return end
+
+    for control in pairs(mgs.autoplace_controls or {}) do
+        object_node_functor:add_fulfiller_for_object_requirement(object, control, object_types.autoplace_control, autoplace_control_requirements.create, object_nodes)
+    end
+
+    local autoplace_settings = mgs.autoplace_settings
+    if not autoplace_settings then return end
+
+    if autoplace_settings.entity then
+        for k, _ in pairs(autoplace_settings.entity.settings or {}) do
+            object_node_functor:add_fulfiller_for_object_requirement(object, k, object_types.autoplace_control, autoplace_control_requirements.create, object_nodes)
+        end
+    end
 end)
 return planet_functor
 
 -- self:add_disjunctive_dependent(nodes, node_types.entity_node, mgs.cliff_settings, "cliff autoplace", entity_verbs.instantiate, "name")
 -- self:add_disjunctive_dependent(nodes, node_types.entity_node, mgs.territory_settings, "planet territory owner", entity_verbs.instantiate, "units")
--- for control in pairs(mgs.autoplace_controls or {}) do
---     self:add_disjunctive_dependent(nodes, node_types.autoplace_control_node, control, "autoplace control", "configure")
--- end
 
 -- local autoplace_settings = mgs.autoplace_settings
 -- if not autoplace_settings then return end
-
--- if autoplace_settings.entity then
---     for k, _ in pairs(autoplace_settings.entity.settings or {}) do
---         self:add_disjunctive_dependent(nodes, node_types.entity_node, k, "autoplace entity", entity_verbs.instantiate)
---     end
--- end
 
 -- if autoplace_settings.tile then
 --     for k, _ in pairs(autoplace_settings.tile.settings or {}) do

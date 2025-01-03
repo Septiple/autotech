@@ -10,6 +10,7 @@ local requirement_node = require "requirement_nodes.requirement_node"
 local requirement_types = require "requirement_nodes.requirement_types"
 local requirement_node_storage = require "requirement_nodes.requirement_node_storage"
 
+local autoplace_control_functor = require "functors.autoplace_control_functor"
 local entity_functor = require "functors.entity_functor"
 local fluid_functor = require "functors.fluid_functor"
 local item_functor = require "functors.item_functor"
@@ -23,6 +24,7 @@ local planet_requirements = require "requirements.planet_requirements"
 
 ---@type table<ObjectType, ObjectNodeFunctor>
 local functor_map = {}
+functor_map[object_types.autoplace_control] = autoplace_control_functor
 functor_map[object_types.entity] = entity_functor
 functor_map[object_types.fluid] = fluid_functor
 functor_map[object_types.item] = item_functor
@@ -121,8 +123,10 @@ function auto_tech:create_nodes()
     process_requirement_type(data.raw["fuel-category"], requirement_types.fuel_category)
     process_requirement_type(data.raw["recipe-category"], requirement_types.recipe_category)
     process_requirement_type(data.raw["resource-category"], requirement_types.resource_category)
-    process_requirement_type(data.raw["autoplace-control"], requirement_types.autoplace_control)
 
+    process_object_type(data.raw["autoplace-control"], autoplace_control_functor)
+    process_object_type(data.raw["fish"], autoplace_control_functor)
+    process_object_type(data.raw["simple-entity"], autoplace_control_functor)
     process_object_type(data.raw["fluid"], fluid_functor)
     process_object_type(data.raw["recipe"], recipe_functor)
     process_object_type(data.raw["technology"], technology_functor)
