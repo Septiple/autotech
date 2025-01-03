@@ -126,6 +126,7 @@ function auto_tech:create_nodes()
 
     process_object_type(data.raw["autoplace-control"], autoplace_control_functor)
     process_object_type(data.raw["fish"], autoplace_control_functor)
+    process_object_type(data.raw["tile"], autoplace_control_functor)
     process_object_type(data.raw["simple-entity"], autoplace_control_functor)
     process_object_type(data.raw["fluid"], fluid_functor)
     process_object_type(data.raw["recipe"], recipe_functor)

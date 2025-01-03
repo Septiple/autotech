@@ -38,6 +38,9 @@ function (object, requirement_nodes, object_nodes)
         for k, _ in pairs(autoplace_settings.entity.settings or {}) do
             object_node_functor:add_fulfiller_for_object_requirement(object, k, object_types.autoplace_control, autoplace_control_requirements.create, object_nodes)
         end
+        for k, _ in pairs(autoplace_settings.tile.settings or {}) do
+            object_node_functor:add_fulfiller_for_object_requirement(object, k, object_types.autoplace_control, autoplace_control_requirements.create, object_nodes)
+        end
     end
 end)
 return planet_functor

@@ -105,7 +105,14 @@ local function concat_requirements(requirements)
 end
 
 function object_node:print_dependencies()
-    return self.nr_requirements .. " requirements on " .. concat_requirements(self.requirements) .. ", " .. self.nr_fulfilled_requirements .. " fulfilled requirements on " .. concat_requirements(self.fulfilled_requirements)
+    local unfulfilled_requirements = {}
+    for requirement, _ in pairs(self.requirements) do
+        if self.fulfilled_requirements[requirement] ~= true then
+            unfulfilled_requirements[requirement] = true
+        end
+    end
+
+    return (self.nr_requirements - self.nr_fulfilled_requirements) .. " unfulfilled requirements on " .. concat_requirements(unfulfilled_requirements) .. " ---- " .. self.nr_fulfilled_requirements .. " fulfilled requirements on " .. concat_requirements(self.fulfilled_requirements)
 end
 
 return object_node
