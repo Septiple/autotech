@@ -159,6 +159,12 @@ function (object, requirement_nodes, object_nodes)
     --     elseif entity.type == "cargo-landing-pad" then
     --         self:add_disjunctive_dependent(nodes, node_types.entity_node, 1, "can land rockets on", entity_verbs.requires_cargo_landing_pad)
     --     end
+    if entity.type == "rocket-silo" then
+        object_node_functor:add_fulfiller_for_independent_requirement(object, requirement_types.rocket_silo, requirement_nodes)
+    end
+    if entity.type == "cargo-landing-pad" then
+        object_node_functor:add_fulfiller_for_independent_requirement(object, requirement_types.cargo_landing_pad, requirement_nodes)
+    end
     
     --     if entity.type == "cargo-pod" then
     --         self:add_disjunctive_dependent(nodes, node_types.entity_node, entity.spawned_container, "spawned container", entity_verbs.instantiate)

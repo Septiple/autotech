@@ -171,6 +171,17 @@ function object_node_functor:add_fulfiller_for_object_requirement(fulfiller, nam
 end
 
 ---@param object ObjectNode
+---@param source RequirementType
+---@param requirement_nodes RequirementNodeStorage
+function object_node_functor:add_independent_requirement_to_object(object, source, requirement_nodes)
+    local requirement = requirement_nodes:find_requirement_node(requirement_descriptor:new_independent_requirement_descriptor(source))
+    if requirement == nil then
+        error("Cannot find requirement " .. source)
+    end
+    object:add_requirement(requirement)
+end
+
+---@param object ObjectNode
 ---@param name string?
 ---@param requirement_type RequirementType
 ---@param requirement_nodes RequirementNodeStorage

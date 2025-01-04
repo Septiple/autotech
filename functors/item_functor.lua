@@ -18,7 +18,6 @@ function (object, requirement_nodes, object_nodes)
     object_node_functor:add_fulfiller_for_object_requirement(object, item.burnt_result, object_types.item, item_requirements.create, object_nodes)
     object_node_functor:add_fulfiller_for_object_requirement(object, item.spoil_result, object_types.item, item_requirements.create, object_nodes)
     object_node_functor:add_fulfiller_for_object_requirement(object, item.plant_result, object_types.entity, entity_requirements.instantiate, object_nodes)
-    object_node_functor:add_fulfiller_for_object_requirement(object, item.rocket_launch_products, object_types.item, item_requirements.create, object_nodes)
 
     if item.type == "armor" then
         object_node_functor:add_fulfiller_for_typed_requirement(object, item.equipment_grid, requirement_types.equipment_grid, requirement_nodes)
@@ -34,7 +33,13 @@ function (object, requirement_nodes, object_nodes)
         object_node_functor:add_fulfiller_for_object_requirement(object, item.place_as_tile.result, object_types.tile, tile_requirements.place, object_nodes)
     end
 
-    -- TODO: cargo-landing-pad requirement. How does that work with smart farms?
+    if item.send_to_orbit_mode and item.send_to_orbit_mode ~= "not-sendable" then
+        object_node_functor:add_independent_requirement_to_object(object, requirement_types.rocket_silo, requirement_nodes)
+        if item.rocket_launch_products then
+            object_node_functor:add_independent_requirement_to_object(object, requirement_types.cargo_landing_pad, requirement_nodes)
+            object_node_functor:add_fulfiller_to_productlike_object(object, item.rocket_launch_products, object_nodes)
+        end
+    end
 end)
 return item_functor
 

@@ -17,7 +17,7 @@ function (object, requirement_nodes, object_nodes)
 
     local minable = tile.minable
     if minable ~= nil then
-        object_node_functor:add_productlike_fulfiller(object, minable.results or minable.result, object_nodes)
+        object_node_functor:add_fulfiller_to_productlike_object(object, minable.results or minable.result, object_nodes)
     end
 
 -- if defines.feature_flags.freezing then

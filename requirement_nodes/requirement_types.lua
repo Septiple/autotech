@@ -10,5 +10,7 @@ local requirement_types = {
     module_category = "module_category",
     recipe_category = "recipe_category",
     resource_category = "resource_category",
+    rocket_silo = "rocket_silo",
+    cargo_landing_pad = "cargo_landing_pad",
 }
 return requirement_types

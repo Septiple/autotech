@@ -46,8 +46,8 @@ function (object, requirement_nodes, object_nodes)
         elseif trigger.type == "craft-fluid" then
             object_node_functor:reverse_add_fulfiller_for_object_requirement(object, technology_requirements.trigger, trigger.fluid, object_types.fluid, object_nodes)
         elseif trigger.type == "send-item-to-orbit" then
-            --self:add_dependency(nodes, node_types.item_node, trigger.item, "researched by sending to orbit", technology_verbs.researched_with)
-            --self:add_dependency(nodes, node_types.entity_node, 1, "requires any cargo-landing-pad prototype", entity_verbs.requires_cargo_landing_pad)
+            object_node_functor:reverse_add_fulfiller_for_object_requirement(object, technology_requirements.trigger, trigger.item, object_types.item, object_nodes)
+            object_node_functor:add_independent_requirement_to_object(object, "rocket_silo", requirement_nodes)
         elseif trigger.type == "create-space-platform" then
             -- todo: technically this should be the rocket silo not the landing pad
             --self:add_dependency(nodes, node_types.entity_node, 1, "requires any cargo-landing-pad prototype", entity_verbs.requires_cargo_landing_pad)
