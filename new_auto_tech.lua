@@ -260,15 +260,15 @@ function auto_tech:verify_end_tech_reachable()
     end
 end
 
-function auto_tech:calculate_transitive_reduction()
-
-end
-
 function auto_tech:construct_tech_graph()
 
 end
 
 function auto_tech:linearise_tech_graph()
+
+end
+
+function auto_tech:calculate_transitive_reduction()
 
 end
 
