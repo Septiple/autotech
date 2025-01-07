@@ -198,6 +198,9 @@ function auto_tech:run_custom_mod_dependencies()
     item_functor:add_fulfiller_for_typed_requirement(self.start_node, "crafting", requirement_types.recipe_category, self.requirement_nodes)
     item_functor:add_fulfiller_for_typed_requirement(self.start_node, "basic-solid", requirement_types.resource_category, self.requirement_nodes)
     item_functor:add_fulfiller_for_object_requirement(self.start_node, "nauvis", object_types.planet, planet_requirements.visit, self.object_nodes)
+
+    self.object_nodes:add_victory_node(object_node_descriptor:new("satellite", object_types.item))
+    self.object_nodes:add_victory_node(object_node_descriptor:new("lab-dark-1", object_types.tile))
 end
 
 function auto_tech:linearise_recipe_graph()
@@ -242,7 +245,19 @@ function auto_tech:linearise_recipe_graph()
 end
 
 function auto_tech:verify_end_tech_reachable()
-
+    local victory_reachable = false
+    for _, victory_node in pairs(self.object_nodes.victory_nodes) do
+        local reachable = victory_node:has_no_more_unfulfilled_requirements()
+        log("Victory node " .. victory_node.printable_name .. " is " .. (reachable and "" or "not ") .. "reachable")
+        if reachable then
+            victory_reachable = true
+        end
+    end
+    if victory_reachable then
+        log("The game can be won with the current mods.")
+    else
+        error("Error: no victory condition can be reached. It's possible that this is a mod not informing autotech about dependencies introduced in the mod correctly or a bug in autotech.")
+    end
 end
 
 function auto_tech:calculate_transitive_reduction()

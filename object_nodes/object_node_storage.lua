@@ -3,6 +3,7 @@ local object_types = require "object_nodes.object_types"
 ---Maps ObjectNodeDescriptors to ObjectNodes, disallowing duplicates
 ---@class ObjectNodeStorage
 ---@field nodes table<ObjectType, table<string, ObjectNode>>
+---@field victory_nodes ObjectNode[]
 local object_node_storage = {}
 object_node_storage.__index = object_node_storage
 
@@ -10,6 +11,7 @@ object_node_storage.__index = object_node_storage
 function object_node_storage:new()
     local result = {
         nodes = {},
+        victory_nodes = {},
     }
     setmetatable(result, self)
 
@@ -43,6 +45,11 @@ function object_node_storage:for_all_nodes(functor)
             functor(object_type, object)
         end
     end
+end
+
+---@param descriptor ObjectNodeDescriptor
+function object_node_storage:add_victory_node(descriptor)
+    table.insert(self.victory_nodes, self:find_object_node(descriptor))
 end
 
 return object_node_storage
