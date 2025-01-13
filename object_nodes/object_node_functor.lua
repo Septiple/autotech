@@ -130,9 +130,15 @@ function object_node_functor:add_fulfiller_for_object_requirement(fulfiller, nam
         return
     end
     local function actualWork(name)
-        local object_descriptor = object_node_descriptor:new(name, object_type)
-        local target_node = object_nodes:find_object_node(object_descriptor)
+        local descriptor = object_node_descriptor:new(name, object_type)
+        local target_node = object_nodes:find_object_node(descriptor)
+        if target_node == nil then
+            error("Cannot find requirement object " .. descriptor.printable_name)
+        end
         local requirement_node = target_node.requirements[requirement]
+        if requirement_node == nil then
+            error("Cannot find requirement " .. requirement)
+        end
         requirement_node:add_fulfiller(fulfiller)
     end
     function checkInnerName(actual_node_name)
@@ -189,9 +195,10 @@ function object_node_functor:add_typed_requirement_to_object(object, name, requi
     if name == nil then
         return
     end
-    local requirement = requirement_nodes:find_requirement_node(requirement_descriptor:new_typed_requirement_descriptor(name, requirement_type))
+    local descriptor = requirement_descriptor:new_typed_requirement_descriptor(name, requirement_type)
+    local requirement = requirement_nodes:find_requirement_node(descriptor)
     if requirement == nil then
-        error("Cannot find requirement " .. name .. " of type " .. requirement_type)
+        error("Cannot find requirement " .. descriptor.printable_name)
     end
     object:add_requirement(requirement)
 end
@@ -202,7 +209,11 @@ end
 function object_node_functor:add_productlike_fulfiller(requirement, productlike, object_nodes)
     local type_of_productlike = productlike.type == "item" and object_types.item or object_types.fluid
     local descriptor = object_node_descriptor:new(productlike.name, type_of_productlike)
-    requirement:add_fulfiller(object_nodes:find_object_node(descriptor))
+    local fulfiller = object_nodes:find_object_node(descriptor)
+    if fulfiller == nil then
+        error("Cannot find fulfiller " .. descriptor.printable_name)
+    end
+    requirement:add_fulfiller(fulfiller)
 end
 
 ---@param fulfiller ObjectNode

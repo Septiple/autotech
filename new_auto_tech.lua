@@ -111,12 +111,18 @@ function auto_tech:create_nodes()
         end
     end
 
+    ---@param object FactorioThing
+    ---@param functor ObjectNodeFunctor
+    local function process_object_type(object, functor)
+        local object_node = object_node:new(object, object_node_descriptor:new(object.name, functor.object_type), self.object_nodes, self.configuration)
+        functor.register_requirements_func(object_node, self.requirement_nodes)
+    end
+
     ---@param table FactorioThingGroup
     ---@param functor ObjectNodeFunctor
-    local function process_object_type(table, functor)
+    local function process_object_types(table, functor)
         for _, object in pairs(table or {}) do
-            local object_node = object_node:new(object, object_node_descriptor:new(object.name, functor.object_type), self.object_nodes, self.configuration)
-            functor.register_requirements_func(object_node, self.requirement_nodes)
+            process_object_type(object, functor)
         end
     end
 
@@ -126,19 +132,34 @@ function auto_tech:create_nodes()
     process_requirement_type(data.raw["recipe-category"], requirement_types.recipe_category)
     process_requirement_type(data.raw["resource-category"], requirement_types.resource_category)
 
-    process_object_type(data.raw["autoplace-control"], autoplace_control_functor)
-    process_object_type(data.raw["fish"], autoplace_control_functor)
-    process_object_type(data.raw["tile"], autoplace_control_functor)
-    process_object_type(data.raw["simple-entity"], autoplace_control_functor)
-    process_object_type(data.raw["fluid"], fluid_functor)
-    process_object_type(data.raw["recipe"], recipe_functor)
-    process_object_type(data.raw["technology"], technology_functor)
-    process_object_type(data.raw["planet"], planet_functor)
-    process_object_type(data.raw["tile"], tile_functor)
+    process_object_types(data.raw["autoplace-control"], autoplace_control_functor)
+    process_object_types(data.raw["fish"], autoplace_control_functor)
+    process_object_types(data.raw["simple-entity"], autoplace_control_functor)
+    process_object_types(data.raw["fluid"], fluid_functor)
+    process_object_types(data.raw["recipe"], recipe_functor)
+    process_object_types(data.raw["technology"], technology_functor)
+    process_object_types(data.raw["planet"], planet_functor)
+    process_object_types(data.raw["tile"], tile_functor)
 
     for item_type in pairs(defines.prototypes.item) do
-        process_object_type(data.raw[item_type], item_functor)
+        process_object_types(data.raw[item_type], item_functor)
     end
+
+    ---Thanks Wube for adding a recycling recipe for this but not the item itself
+    ---@param name string
+    local function add_nonexistent_thing(name)
+        process_object_type({
+            name=name,
+            type="nonexistent",
+        }, item_functor)
+    end
+    add_nonexistent_thing("selection-tool")
+    add_nonexistent_thing("upgrade-planner")
+    add_nonexistent_thing("blueprint-book")
+    add_nonexistent_thing("deconstruction-planner")
+    add_nonexistent_thing("copy-paste-tool")
+    add_nonexistent_thing("cut-paste-tool")
+    add_nonexistent_thing("blueprint")
 
     local module_categories = {}
     for _, module in pairs(data.raw.module) do
@@ -146,9 +167,9 @@ function auto_tech:create_nodes()
     end
 
     -- asteroid chunks are actually not entities however they define standard minable properties.
-    process_object_type(data.raw["asteroid-chunk"], entity_functor)
+    process_object_types(data.raw["asteroid-chunk"], entity_functor)
     for entity_type in pairs(defines.prototypes.entity) do
-        process_object_type(data.raw[entity_type], entity_functor)
+        process_object_types(data.raw[entity_type], entity_functor)
 
         for _, entity in pairs(data.raw[entity_type] or {}) do
             if entity.allowed_module_categories then

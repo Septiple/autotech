@@ -4,6 +4,7 @@ local object_node_functor = require "object_nodes.object_node_functor"
 local requirement_node = require "requirement_nodes.requirement_node"
 local autoplace_control_requirements = require "requirements.autoplace_control_requirements"
 local planet_requirements = require "requirements.planet_requirements"
+local tile_requirements = require "requirements.tile_requirements"
 
 local planet_functor = object_node_functor:new(object_types.planet,
 function (object, requirement_nodes)
@@ -39,7 +40,7 @@ function (object, requirement_nodes, object_nodes)
             object_node_functor:add_fulfiller_for_object_requirement(object, k, object_types.autoplace_control, autoplace_control_requirements.create, object_nodes)
         end
         for k, _ in pairs(autoplace_settings.tile.settings or {}) do
-            object_node_functor:add_fulfiller_for_object_requirement(object, k, object_types.autoplace_control, autoplace_control_requirements.create, object_nodes)
+            object_node_functor:add_fulfiller_for_object_requirement(object, k, object_types.tile, tile_requirements.place, object_nodes)
         end
     end
 end)
