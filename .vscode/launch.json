@@ -16,7 +16,7 @@
             "request": "launch",
             "name": "Filter input files",
             "script": "${workspaceFolder}\\test\\filter_inputs.ps1",
-            "args": [],
+            "args": [ "-ExecutionPolicy", "Bypass"],
             "cwd": "${workspaceFolder}\\test"
         }
     ]
