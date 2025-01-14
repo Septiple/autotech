@@ -3,7 +3,6 @@ local requirement_types = {
     ammo_category = "ammo_category",
     electricity = "electricity",
     equipment_grid = "equipment_grid",
-    fluid_fuel = "fluid_fuel",
     fluid_with_fuel_value = "fluid_with_fuel_value",
     fuel_category = "fuel_category",
     heat = "heat",

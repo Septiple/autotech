@@ -13,7 +13,7 @@ function (object, requirement_nodes, object_nodes)
     ---@cast fluid FluidDefinition
 
     if fluid.fuel_value ~= nil then
-        object_node_functor:add_fulfiller_for_independent_requirement(object, requirement_types.fluid_fuel, requirement_nodes)
+        object_node_functor:add_fulfiller_for_independent_requirement(object, requirement_types.fluid_with_fuel_value, requirement_nodes)
     end
 end)
 return fluid_functor
