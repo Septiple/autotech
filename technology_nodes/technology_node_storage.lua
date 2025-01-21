@@ -29,4 +29,11 @@ function technology_node_storage:find_technology_node(object_node)
     return self.nodes[object_node]
 end
 
+---@param functor fun(technology_node: TechnologyNode)
+function technology_node_storage:for_all_nodes(functor)
+    for _, technology_node in pairs(self.nodes) do
+        functor(technology_node)
+    end
+end
+
 return technology_node_storage

@@ -11,6 +11,7 @@
 ---@field fulfilled_requirements table<string, boolean>
 ---@field nr_fulfilled_requirements int
 ---@field this_can_fulfil RequirementNode[]
+---@field technology_unlocks ObjectNode[]
 local object_node = {}
 object_node.__index = object_node
 
@@ -33,6 +34,7 @@ function object_node:new(object, descriptor, object_nodes, configuration)
     result.this_can_fulfil = {}
     result.fulfilled_requirements = {}
     result.nr_fulfilled_requirements = 0
+    result.technology_unlocks = {}
 
     object_nodes:add_object_node(result)
 

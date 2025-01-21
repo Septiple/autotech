@@ -287,13 +287,15 @@ function auto_tech:verify_end_tech_reachable()
 end
 
 function auto_tech:construct_tech_graph()
-    self.object_nodes:for_all_nodes_of_type(object_types.technology, function (object)
-        technology_node:new(object, self.technology_nodes)
+    self.object_nodes:for_all_nodes_of_type(object_types.technology, function (object_node)
+        technology_node:new(object_node, self.technology_nodes)
     end)
 end
 
 function auto_tech:linearise_tech_graph()
-
+    self.technology_nodes:for_all_nodes(function (tech_node)
+        tech_node:link_technologies()
+    end)
 end
 
 function auto_tech:calculate_transitive_reduction()

@@ -1,5 +1,6 @@
 local item_requirements = require "requirements.item_requirements"
 local object_types = require "object_nodes.object_types"
+local object_node_descriptor = require "object_nodes.object_node_descriptor"
 local object_node_functor = require "object_nodes.object_node_functor"
 local requirement_node = require "requirement_nodes.requirement_node"
 local recipe_requirements = require "requirements.recipe_requirements"
@@ -25,13 +26,28 @@ function (object, requirement_nodes, object_nodes)
 
     object_node_functor:reverse_add_fulfiller_for_object_requirement_table(object, technology_requirements.prerequisite, tech.prerequisites, object_types.technology, object_nodes)
 
+    local function add_technology_unlock(name, type)
+        local descriptor = object_node_descriptor:new(name, type)
+        local item_to_give = object_nodes:find_object_node(descriptor)
+        if item_to_give == nil then
+            error("Could not find node for " .. descriptor.printable_name)
+        end
+        if object.configuration.verbose_logging then
+            log("Add technology unlock " .. descriptor.printable_name .. " to tech " .. object.printable_name)
+        end
+        object.technology_unlocks[#object.technology_unlocks] = item_to_give
+    end
+
     for _, modifier in pairs(tech.effects or {}) do
         if modifier.type == "give-item" then
             object_node_functor:add_fulfiller_for_object_requirement(object, modifier.item, object_types.item, item_requirements.create, object_nodes)
+            add_technology_unlock(modifier.item, object_types.item)
         elseif modifier.type == "unlock-recipe" then
             object_node_functor:add_fulfiller_for_object_requirement(object, modifier.recipe, object_types.recipe, recipe_requirements.enable, object_nodes)
+            add_technology_unlock(modifier.recipe, object_types.recipe)
         elseif modifier.type == "unlock-space-location" then
             object_node_functor:add_fulfiller_for_object_requirement(object, modifier.space_location, object_types.planet, planet_requirements.visit, object_nodes)
+            add_technology_unlock(modifier.space_location, object_types.planet)
         end
     end
 
