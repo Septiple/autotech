@@ -47,6 +47,14 @@ function object_node_storage:for_all_nodes(functor)
     end
 end
 
+---@param object_type ObjectType
+---@param functor fun(object: ObjectNode)
+function object_node_storage:for_all_nodes_of_type(object_type, functor)
+    for _, object in pairs(self.nodes[object_type]) do
+        functor(object)
+    end
+end
+
 ---@param descriptor ObjectNodeDescriptor
 function object_node_storage:add_victory_node(descriptor)
     table.insert(self.victory_nodes, self:find_object_node(descriptor))

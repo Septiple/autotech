@@ -6,9 +6,13 @@ local object_node = require "object_nodes.object_node"
 local object_types = require "object_nodes.object_types"
 local object_node_descriptor = require "object_nodes.object_node_descriptor"
 local object_node_storage = require "object_nodes.object_node_storage"
+
 local requirement_node = require "requirement_nodes.requirement_node"
 local requirement_types = require "requirement_nodes.requirement_types"
 local requirement_node_storage = require "requirement_nodes.requirement_node_storage"
+
+local technology_node = require "technology_nodes.technology_node"
+local technology_node_storage = require "technology_nodes.technology_node_storage"
 
 local autoplace_control_functor = require "functors.autoplace_control_functor"
 local entity_functor = require "functors.entity_functor"
@@ -37,6 +41,7 @@ functor_map[object_types.tile] = tile_functor
 --- @field private configuration Configuration
 --- @field private object_nodes ObjectNodeStorage
 --- @field private requirement_nodes RequirementNodeStorage
+--- @field private technology_nodes TechnologyNodeStorage
 local auto_tech = {}
 auto_tech.__index = auto_tech
 
@@ -49,6 +54,7 @@ function auto_tech.create(configuration)
     result.configuration = configuration
     result.object_nodes = object_node_storage:new()
     result.requirement_nodes = requirement_node_storage:new()
+    result.technology_nodes = technology_node_storage:new()
     return result
 end
 
@@ -221,7 +227,6 @@ function auto_tech:run_custom_mod_dependencies()
     item_functor:add_fulfiller_for_object_requirement(self.start_node, "nauvis", object_types.planet, planet_requirements.visit, self.object_nodes)
 
     self.object_nodes:add_victory_node(object_node_descriptor:new("satellite", object_types.item))
-    self.object_nodes:add_victory_node(object_node_descriptor:new("lab-dark-1", object_types.tile))
 end
 
 function auto_tech:linearise_recipe_graph()
@@ -282,7 +287,9 @@ function auto_tech:verify_end_tech_reachable()
 end
 
 function auto_tech:construct_tech_graph()
-
+    self.object_nodes:for_all_nodes_of_type(object_types.technology, function (object)
+        technology_node:new(object, self.technology_nodes)
+    end)
 end
 
 function auto_tech:linearise_tech_graph()
