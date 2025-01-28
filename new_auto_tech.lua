@@ -93,7 +93,8 @@ function auto_tech:run()
         self:run_phase(self.run_custom_mod_dependencies, "custom mod dependencies")
         self:run_phase(self.linearise_recipe_graph, "recipe graph linearisation")
         self:run_phase(self.verify_end_tech_reachable, "verify end tech reachable")
-        self:run_phase(self.construct_tech_graph, "constructing tech graph")
+        self:run_phase(self.construct_tech_graph_nodes, "constructing tech graph nodes")
+        self:run_phase(self.construct_tech_graph_edges, "constructing tech graph edges")
         self:run_phase(self.linearise_tech_graph, "tech graph linearisation")
         self:run_phase(self.calculate_transitive_reduction, "transitive reduction calculation")
         self:run_phase(self.adapt_tech_links, "adapting tech links")
@@ -286,15 +287,53 @@ function auto_tech:verify_end_tech_reachable()
     end
 end
 
-function auto_tech:construct_tech_graph()
+function auto_tech:construct_tech_graph_nodes()
     self.object_nodes:for_all_nodes_of_type(object_types.technology, function (object_node)
         technology_node:new(object_node, self.technology_nodes)
     end)
 end
 
-function auto_tech:linearise_tech_graph()
+function auto_tech:construct_tech_graph_edges()
     self.technology_nodes:for_all_nodes(function (tech_node)
-        tech_node:link_technologies()
+        tech_node:link_technologies(self.technology_nodes)
+    end)
+end
+
+function auto_tech:linearise_tech_graph()
+    local verbose_logging = self.configuration.verbose_logging
+    local q = deque.new()
+    self.technology_nodes:for_all_nodes(function (technology_node)
+        if technology_node:has_no_more_unfulfilled_requirements() then
+            q:push_right(technology_node)
+            if verbose_logging then
+                log("Technology " .. technology_node.printable_name .. " starts with no dependencies.")
+            end
+        end
+    end)
+
+    while not q:is_empty() do
+        ---@type TechnologyNode
+        local next = q:pop_left()
+        if verbose_logging then
+            log("Technology " .. next.printable_name .. " is next in the linearisation.")
+        end
+
+        local newly_independent_nodes = next:on_node_becomes_independent()
+        if verbose_logging then
+            for _, node in pairs(newly_independent_nodes) do
+                log("After releasing " .. next.printable_name .. " node " .. node.printable_name .. " is now independent.")
+            end
+        end
+
+        for _, node in pairs(newly_independent_nodes) do
+            q:push_right(node)
+        end
+    end
+
+    self.technology_nodes:for_all_nodes(function (technology_node)
+        if not technology_node:has_no_more_unfulfilled_requirements() then
+            log("Node " .. technology_node.printable_name .. " still has unresolved dependencies: " .. technology_node:print_dependencies())
+        end
     end)
 end
 

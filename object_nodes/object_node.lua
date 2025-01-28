@@ -1,5 +1,7 @@
 --- @module "definitions"
 
+local concat_requirements = require "utils.concat_requirements"
+
 ---Represents a thing in Factorio. May have requirements, and may fulfil requirements.
 ---@class ObjectNode
 ---@field object FactorioThing
@@ -91,19 +93,6 @@ function object_node:on_node_becomes_independent()
         end
     end
     return result
-end
-
-local function concat_requirements(requirements)
-    local dependency_names = ""
-    for requirement_name, _ in pairs(requirements) do
-        dependency_names = dependency_names .. requirement_name .. ", "
-    end
-    -- trim last ", "
-    if dependency_names:sub(-2) == ", " then
-        dependency_names = dependency_names:sub(1, -3)
-    end
-
-    return dependency_names
 end
 
 function object_node:print_dependencies()
