@@ -65,7 +65,7 @@ function auto_tech:run_phase(phase_function, phase_name)
 end
 
 function auto_tech:run()
-    -- TODO:
+    -- TODO (outdated):
     -- armor and gun stuff, military entities
     -- ignore soot results
     -- miner with fluidbox
@@ -88,6 +88,7 @@ function auto_tech:run()
     -- resource
 
     self:run_phase(function()
+        self:run_phase(self.vanilla_massaging, "vanilla massaging")
         self:run_phase(self.create_nodes, "recipe graph node creation")
         self:run_phase(self.link_nodes, "recipe graph link creation")
         self:run_phase(self.run_custom_mod_dependencies, "custom mod dependencies")
@@ -100,6 +101,23 @@ function auto_tech:run()
         self:run_phase(self.adapt_tech_links, "adapting tech links")
         self:run_phase(self.set_tech_costs, "tech cost setting")
     end, "autotech")
+end
+
+function auto_tech:vanilla_massaging()
+    for name, recipe in pairs(data.raw["recipe"]) do
+        if string.match(name, "%a+%-barrel") then
+            if self.configuration.verbose_logging then
+                log("Marking barreling recipe " .. name .. " as ignore_in_pypp")
+            end
+            recipe.ignore_in_pypp = true
+        end
+        if string.match(name, "empty%-%a+%-barrel") then
+            if self.configuration.verbose_logging then
+                log("Marking unbarreling recipe " .. name .. " as ignore_in_pypp")
+            end
+            recipe.ignore_in_pypp = true
+        end
+    end
 end
 
 function auto_tech:create_nodes()

@@ -17,14 +17,25 @@ end
 
 local recipe_functor = object_node_functor:new(object_types.recipe,
 function (object, requirement_nodes)
+    local recipe = object.object
+
     requirement_node:add_new_object_dependent_requirement(recipe_requirements.enable, object, requirement_nodes, object.configuration)
 
-    local recipe = object.object
+    if recipe.ignore_in_pypp then
+        if object.configuration.verbose_logging then
+            log("Skipping recipe " .. object.printable_name .. ", as it's marked ignore_in_pypp")
+        end
+        return
+    end
 
     requirement_node:add_new_object_dependent_requirement_table(ingredientList(recipe.ingredients), recipe_requirements.ingredient, object, requirement_nodes, object.configuration)
 end,
 function (object, requirement_nodes, object_nodes)
     local recipe = object.object
+
+    if recipe.ignore_in_pypp then
+        return
+    end
 
     object_node_functor:add_typed_requirement_to_object(object, recipe.category or "crafting", requirement_types.recipe_category, requirement_nodes)
 

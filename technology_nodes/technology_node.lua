@@ -87,7 +87,7 @@ function technology_node:link_technologies(technology_nodes)
                 if canonical_fulfiller_node == nil then
                     error("No tech node found for " .. canonical_fulfiller.printable_name)
                 end
-                if canonical_fulfiller_node ~= self then
+                if canonical_fulfiller_node ~= self and self.requirements[canonical_fulfiller.printable_name] == nil then
                     self.requirements[canonical_fulfiller.printable_name] = canonical_fulfiller_node
                     self.nr_requirements = self.nr_requirements + 1
                     canonical_fulfiller_node.nodes_that_require_this[self.printable_name] = self
@@ -95,7 +95,7 @@ function technology_node:link_technologies(technology_nodes)
                     if verbose_logging then
                         log("Found a tech dependency: " .. canonical_fulfiller.printable_name)
                     end
-                    end
+                end
             else
                 if visitedObjects[canonical_fulfiller] == nil then
                     q:push_right(canonical_fulfiller)
