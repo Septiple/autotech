@@ -97,10 +97,11 @@ function auto_tech:run()
         self:run_phase(self.link_nodes, "recipe graph link creation")
         self:run_phase(self.run_custom_mod_dependencies, "custom mod dependencies")
         self:run_phase(self.linearise_recipe_graph, "recipe graph linearisation")
-        self:run_phase(self.verify_end_tech_reachable, "verify end tech reachable")
+        self:run_phase(self.verify_victory_reachable_recipe_graph, "verify victory reachable in recipe graph")
         self:run_phase(self.construct_tech_graph_nodes, "constructing tech graph nodes")
         self:run_phase(self.construct_tech_graph_edges, "constructing tech graph edges")
         self:run_phase(self.linearise_tech_graph, "tech graph linearisation")
+        self:run_phase(self.verify_victory_reachable_tech_graph, "verify victory reachable in tech graph")
         self:run_phase(self.calculate_transitive_reduction, "transitive reduction calculation")
         self:run_phase(self.adapt_tech_links, "adapting tech links")
         self:run_phase(self.set_tech_costs, "tech cost setting")
@@ -292,7 +293,7 @@ function auto_tech:linearise_recipe_graph()
     end
 end
 
-function auto_tech:verify_end_tech_reachable()
+function auto_tech:verify_victory_reachable_recipe_graph()
     local victory_reachable = self.victory_node:has_no_more_unfulfilled_requirements()
     if victory_reachable then
         log("The game can be won with the current mods.")
@@ -305,6 +306,7 @@ function auto_tech:construct_tech_graph_nodes()
     self.object_nodes:for_all_nodes_of_type(object_types.technology, function (object_node)
         technology_node:new(object_node, self.technology_nodes)
     end)
+    technology_node:new(self.victory_node, self.technology_nodes)
 end
 
 function auto_tech:construct_tech_graph_edges()
@@ -349,6 +351,16 @@ function auto_tech:linearise_tech_graph()
             log("Node " .. technology_node.printable_name .. " still has unresolved dependencies: " .. technology_node:print_dependencies())
         end
     end)
+end
+
+function auto_tech:verify_victory_reachable_tech_graph()
+    local victory_node = self.technology_nodes:find_technology_node(self.victory_node)
+    local victory_reachable = victory_node:has_no_more_unfulfilled_requirements()
+    if victory_reachable then
+        log("With the canonical choices, the tech graph has a partial linear ordering that allows victory to be reached.")
+    else
+        error("Error: no partial linearisation of the tech graph with the canonical choices allows victory to be reached.")
+    end
 end
 
 function auto_tech:calculate_transitive_reduction()
