@@ -9,5 +9,6 @@ local object_types = {
     start = "start",
     technology = "technology",
     tile = "tile",
+    victory = "victory",
 }
 return object_types

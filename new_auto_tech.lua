@@ -18,10 +18,12 @@ local autoplace_control_functor = require "functors.autoplace_control_functor"
 local entity_functor = require "functors.entity_functor"
 local fluid_functor = require "functors.fluid_functor"
 local item_functor = require "functors.item_functor"
+local start_functor = require "functors.start_functor"
 local planet_functor = require "functors.planet_functor"
 local recipe_functor = require "functors.recipe_functor"
 local technology_functor = require "functors.technology_functor"
 local tile_functor = require "functors.tile_functor"
+local victory_functor = require "functors.victory_functor"
 
 local item_requirements = require "requirements.item_requirements"
 local planet_requirements = require "requirements.planet_requirements"
@@ -32,10 +34,12 @@ functor_map[object_types.autoplace_control] = autoplace_control_functor
 functor_map[object_types.entity] = entity_functor
 functor_map[object_types.fluid] = fluid_functor
 functor_map[object_types.item] = item_functor
+functor_map[object_types.start] = start_functor
 functor_map[object_types.planet] = planet_functor
 functor_map[object_types.recipe] = recipe_functor
 functor_map[object_types.technology] = technology_functor
 functor_map[object_types.tile] = tile_functor
+functor_map[object_types.victory] = victory_functor
 
 --- @class auto_tech
 --- @field private configuration Configuration
@@ -122,11 +126,13 @@ end
 
 function auto_tech:create_nodes()
     self.start_node = object_node:new({name="start"}, object_node_descriptor:unique_node(object_types.start), self.object_nodes, self.configuration)
+    self.victory_node = object_node:new({name="victory"}, object_node_descriptor:unique_node(object_types.victory), self.object_nodes, self.configuration)
     requirement_node:new_independent_requirement(requirement_types.electricity, self.requirement_nodes, self.configuration)
     requirement_node:new_independent_requirement(requirement_types.fluid_with_fuel_value, self.requirement_nodes, self.configuration)
     requirement_node:new_independent_requirement(requirement_types.heat, self.requirement_nodes, self.configuration)
     requirement_node:new_independent_requirement(requirement_types.rocket_silo, self.requirement_nodes, self.configuration)
     requirement_node:new_independent_requirement(requirement_types.cargo_landing_pad, self.requirement_nodes, self.configuration)
+    requirement_node:new_independent_requirement(requirement_types.victory, self.requirement_nodes, self.configuration)
 
     ---@param table FactorioThingGroup
     ---@param requirement_type RequirementType
@@ -170,22 +176,6 @@ function auto_tech:create_nodes()
         process_object_types(data.raw[item_type], item_functor)
     end
 
-    ---Thanks Wube for adding a recycling recipe for this but not the item itself
-    ---@param name string
-    local function add_nonexistent_thing(name)
-        process_object_type({
-            name=name,
-            type="nonexistent",
-        }, item_functor)
-    end
-    add_nonexistent_thing("selection-tool")
-    add_nonexistent_thing("upgrade-planner")
-    add_nonexistent_thing("blueprint-book")
-    add_nonexistent_thing("deconstruction-planner")
-    add_nonexistent_thing("copy-paste-tool")
-    add_nonexistent_thing("cut-paste-tool")
-    add_nonexistent_thing("blueprint")
-
     local module_categories = {}
     for _, module in pairs(data.raw.module) do
         module_categories[module.category] = true
@@ -214,13 +204,26 @@ function auto_tech:create_nodes()
     end
 
     process_requirement_type(_module_categories, requirement_types.module_category)
+
+    ---Thanks Wube for adding a recycling recipe for this but not the item itself
+    ---@param name string
+    local function add_nonexistent_thing(name)
+        process_object_type({
+            name=name,
+            type="nonexistent",
+        }, item_functor)
+    end
+    add_nonexistent_thing("selection-tool")
+    add_nonexistent_thing("upgrade-planner")
+    add_nonexistent_thing("blueprint-book")
+    add_nonexistent_thing("deconstruction-planner")
+    add_nonexistent_thing("copy-paste-tool")
+    add_nonexistent_thing("cut-paste-tool")
+    add_nonexistent_thing("blueprint")
 end
 
 function auto_tech:link_nodes()
     self.object_nodes:for_all_nodes(function (object_type, object)
-        if object_type == object_types.start then
-            return
-        end
         functor_map[object_type]:register_dependencies(object, self.requirement_nodes, self.object_nodes)
     end)
 end
@@ -245,7 +248,7 @@ function auto_tech:run_custom_mod_dependencies()
     item_functor:add_fulfiller_for_typed_requirement(self.start_node, "basic-solid", requirement_types.resource_category, self.requirement_nodes)
     item_functor:add_fulfiller_for_object_requirement(self.start_node, "nauvis", object_types.planet, planet_requirements.visit, self.object_nodes)
 
-    self.object_nodes:add_victory_node(object_node_descriptor:new("satellite", object_types.item))
+    victory_functor:add_fulfiller_for_independent_requirement(self.object_nodes:find_object_node(object_node_descriptor:new("satellite", object_types.item)), requirement_types.victory, self.requirement_nodes)
 end
 
 function auto_tech:linearise_recipe_graph()
@@ -290,14 +293,7 @@ function auto_tech:linearise_recipe_graph()
 end
 
 function auto_tech:verify_end_tech_reachable()
-    local victory_reachable = false
-    for _, victory_node in pairs(self.object_nodes.victory_nodes) do
-        local reachable = victory_node:has_no_more_unfulfilled_requirements()
-        log("Victory node " .. victory_node.printable_name .. " is " .. (reachable and "" or "not ") .. "reachable")
-        if reachable then
-            victory_reachable = true
-        end
-    end
+    local victory_reachable = self.victory_node:has_no_more_unfulfilled_requirements()
     if victory_reachable then
         log("The game can be won with the current mods.")
     else

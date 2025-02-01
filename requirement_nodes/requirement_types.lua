@@ -11,5 +11,6 @@ local requirement_types = {
     resource_category = "resource_category",
     rocket_silo = "rocket_silo",
     cargo_landing_pad = "cargo_landing_pad",
+    victory = "victory",
 }
 return requirement_types
