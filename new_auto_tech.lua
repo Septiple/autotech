@@ -92,7 +92,7 @@ function auto_tech:run()
     -- resource
 
     self:run_phase(function()
-        self:run_phase(self.vanilla_massaging, "vanilla massaging")
+        --self:run_phase(self.vanilla_massaging, "vanilla massaging")
         self:run_phase(self.create_nodes, "recipe graph node creation")
         self:run_phase(self.link_nodes, "recipe graph link creation")
         self:run_phase(self.run_custom_mod_dependencies, "custom mod dependencies")
@@ -358,29 +358,44 @@ function auto_tech:verify_victory_reachable_tech_graph()
     local victory_node = self.technology_nodes:find_technology_node(self.victory_node)
     local victory_reachable = victory_node:has_no_more_unfulfilled_requirements()
     if victory_reachable then
-        log("With the canonical choices, the tech graph has a partial linear ordering that allows victory to be reached.")
+        if self.configuration.verbose_logging then
+            log("With the canonical choices, the tech graph has a partial linear ordering that allows victory to be reached.")
+        end
     else
         -- First, find a loop
         local current_node = victory_node
         local seen_nodes = {}
         while true do
-            current_node = current_node:get_any_unfulfilled_requirement()
+            current_node, _ = current_node:get_any_unfulfilled_requirement()
             if seen_nodes[current_node] ~= nil then
                 break
             end
             seen_nodes[current_node] = true
         end
         
-        local message = "Tech loop detected: "
+        log("Tech loop detected:")
         local loop_start = current_node
         local firstIteration = true
         while loop_start ~= current_node or firstIteration do
             firstIteration = false
-            message = message .. current_node.printable_name .. " -> "
-            current_node = current_node:get_any_unfulfilled_requirement()
+            local previous_node = current_node
+            log("The technology " .. current_node.printable_name .. " has the following requirement chain to the next technology:")
+            current_node, tracking_node = current_node:get_any_unfulfilled_requirement()
+            local messages = {}
+            while tracking_node.previous ~= nil do
+                messages[#messages + 1] = "Via requirement " .. tracking_node.requirement.printable_name .. " this depends on " .. tracking_node.object.printable_name
+                tracking_node = tracking_node.previous
+            end
+            if tracking_node.object == previous_node.object_node then
+                messages[#messages + 1] = "This technology has requirements to be researched, namely:"
+            else
+                messages[#messages + 1] = "This technology unlocks " .. tracking_node.object.printable_name
+            end
+            for i = #messages, 1, -1 do
+                log(messages[i])
+            end
         end
-        message = message .. loop_start.printable_name
-        log(message)
+        log("And we're back to node " .. loop_start.printable_name)
 
         error("Error: no partial linearisation of the tech graph with the canonical choices allows victory to be reached. Details have been printed to the log.")
     end

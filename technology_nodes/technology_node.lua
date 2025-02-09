@@ -1,13 +1,14 @@
 local object_types = require "object_nodes.object_types"
 local concat_requirements = require "utils.concat_requirements"
 local deque = require "utils.deque"
+local technology_dependency_tracking_node = require "technology_nodes.technology_dependency_tracking_node"
 
 ---Represents a technology
 ---@class TechnologyNode
 ---@field object_node ObjectNode
 ---@field printable_name string
 ---@field configuration Configuration
----@field requirements table<TechnologyNode, boolean>
+---@field requirements table<TechnologyNode, TechnologyDependencyTrackingNode>
 ---@field nr_requirements int
 ---@field fulfilled_requirements table<TechnologyNode, boolean>
 ---@field nr_fulfilled_requirements int
@@ -57,7 +58,7 @@ function technology_node:link_technologies(technology_nodes)
 
     local function add_initial_node(node)
         visitedObjects[node] = true
-        q:push_right(node)
+        q:push_right(technology_dependency_tracking_node:new_root(node))
         if verbose_logging then
             log("Initial node that needs to be useable: " .. node.printable_name)
         end
@@ -68,10 +69,11 @@ function technology_node:link_technologies(technology_nodes)
     end
 
     while not q:is_empty() do
-        ---@type ObjectNode
-        local next = q:pop_left()
+        ---@type TechnologyDependencyTrackingNode
+        local next_tracking_node = q:pop_left()
+        local next_object = next_tracking_node.object
 
-        for _, requirement in pairs(next.requirements) do
+        for _, requirement in pairs(next_object.requirements) do
             ---@type ObjectNode
             local canonical_fulfiller = requirement.canonical_fulfiller
             if canonical_fulfiller == nil then
@@ -82,13 +84,14 @@ function technology_node:link_technologies(technology_nodes)
                 return
             end
 
+            local tracker_node = technology_dependency_tracking_node:new_from_previous(canonical_fulfiller, requirement, next_tracking_node)
             if canonical_fulfiller.descriptor.object_type == object_types.technology then
                 local canonical_fulfiller_node = technology_nodes:find_technology_node(canonical_fulfiller)
                 if canonical_fulfiller_node == nil then
                     error("No tech node found for " .. canonical_fulfiller.printable_name)
                 end
-                if canonical_fulfiller_node ~= self and self.requirements[canonical_fulfiller_node] ~= true then
-                    self.requirements[canonical_fulfiller_node] = true
+                if canonical_fulfiller_node ~= self and self.requirements[canonical_fulfiller_node] == nil then
+                    self.requirements[canonical_fulfiller_node] = tracker_node
                     self.nr_requirements = self.nr_requirements + 1
                     canonical_fulfiller_node.nodes_that_require_this[self.printable_name] = self
     
@@ -98,7 +101,7 @@ function technology_node:link_technologies(technology_nodes)
                 end
             else
                 if visitedObjects[canonical_fulfiller] == nil then
-                    q:push_right(canonical_fulfiller)
+                    q:push_right(tracker_node)
                     visitedObjects[canonical_fulfiller] = true
 
                     if verbose_logging then
@@ -141,8 +144,7 @@ end
 
 function technology_node:get_any_unfulfilled_requirement()
     self:calculate_unfulfilled_requirements()
-    local next_node, _ = next(self.unfulfilled_requirements)
-    return next_node
+    return next(self.unfulfilled_requirements)
 end
 
 function technology_node:calculate_unfulfilled_requirements()
@@ -151,9 +153,9 @@ function technology_node:calculate_unfulfilled_requirements()
     end
     self.unfulfilled_requirements = {}
     self.nr_unfulfilled_requirements = self.nr_requirements - self.nr_fulfilled_requirements
-    for requirement, _ in pairs(self.requirements) do
+    for requirement, tracking_node in pairs(self.requirements) do
         if self.fulfilled_requirements[requirement] == nil then
-            self.unfulfilled_requirements[requirement] = true
+            self.unfulfilled_requirements[requirement] = tracking_node
         end
     end
 end
