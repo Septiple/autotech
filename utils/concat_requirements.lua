@@ -1,7 +1,7 @@
 local function concat_requirements(requirements)
     local dependency_names = ""
-    for requirement_name, _ in pairs(requirements) do
-        dependency_names = dependency_names .. requirement_name .. ", "
+    for requirement, _ in pairs(requirements) do
+        dependency_names = dependency_names .. requirement.printable_name .. ", "
     end
     -- trim last ", "
     if dependency_names:sub(-2) == ", " then

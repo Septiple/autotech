@@ -359,6 +359,28 @@ function auto_tech:verify_victory_reachable_tech_graph()
     if victory_reachable then
         log("With the canonical choices, the tech graph has a partial linear ordering that allows victory to be reached.")
     else
+        -- First, find a loop
+        local current_node = victory_node
+        local seen_nodes = {}
+        while true do
+            local previous_node = current_node
+            current_node = current_node:get_any_unfulfilled_requirement()
+            if seen_nodes[current_node] ~= nil then
+                break
+            end
+            seen_nodes[current_node] = true
+        end
+        
+        log("Tech loop detected:")
+        local loop_start = current_node
+        local firstIteration = true
+        while loop_start ~= current_node and not firstIteration do
+            firstIteration = false
+            log(current_node.printable_name)
+            current_node = current_node:get_any_unfulfilled_requirement()
+        end
+
+
         error("Error: no partial linearisation of the tech graph with the canonical choices allows victory to be reached.")
     end
 end

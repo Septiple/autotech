@@ -114,7 +114,7 @@ function requirement_node:try_add_canonical_fulfiller(fulfiller)
 
     local result = {}
     for _, target in pairs(self.nodes_that_require_this) do
-        local target_now_is_independent = target:on_fulfil_requirement(self.descriptor.name)
+        local target_now_is_independent = target:on_fulfil_requirement(self)
         if target_now_is_independent then
             result[#result+1] = target
         end

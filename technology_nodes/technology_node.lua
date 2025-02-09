@@ -7,9 +7,9 @@ local deque = require "utils.deque"
 ---@field object_node ObjectNode
 ---@field printable_name string
 ---@field configuration Configuration
----@field requirements table<string, TechnologyNode>
+---@field requirements table<TechnologyNode, boolean>
 ---@field nr_requirements int
----@field fulfilled_requirements table<string, boolean>
+---@field fulfilled_requirements table<TechnologyNode, boolean>
 ---@field nr_fulfilled_requirements int
 ---@field nodes_that_require_this table<string, TechnologyNode>
 ---@field not_part_of_canonical_path boolean
@@ -87,8 +87,8 @@ function technology_node:link_technologies(technology_nodes)
                 if canonical_fulfiller_node == nil then
                     error("No tech node found for " .. canonical_fulfiller.printable_name)
                 end
-                if canonical_fulfiller_node ~= self and self.requirements[canonical_fulfiller.printable_name] == nil then
-                    self.requirements[canonical_fulfiller.printable_name] = canonical_fulfiller_node
+                if canonical_fulfiller_node ~= self and self.requirements[canonical_fulfiller] ~= true then
+                    self.requirements[canonical_fulfiller_node] = true
                     self.nr_requirements = self.nr_requirements + 1
                     canonical_fulfiller_node.nodes_that_require_this[self.printable_name] = self
     
@@ -117,7 +117,7 @@ function technology_node:has_no_more_unfulfilled_requirements()
     return self.nr_requirements == self.nr_fulfilled_requirements
 end
 
----@param requirement string
+---@param requirement TechnologyNode
 function technology_node:on_fulfil_requirement(requirement)
     local fulfilled_requirements = self.fulfilled_requirements
     if fulfilled_requirements[requirement] then
@@ -131,7 +131,7 @@ end
 function technology_node:on_node_becomes_independent()
     local result = {}
     for _, target in pairs(self.nodes_that_require_this) do
-        local target_now_is_independent = target:on_fulfil_requirement(self.printable_name)
+        local target_now_is_independent = target:on_fulfil_requirement(self)
         if target_now_is_independent then
             result[#result+1] = target
         end
@@ -139,15 +139,29 @@ function technology_node:on_node_becomes_independent()
     return result
 end
 
-function technology_node:print_dependencies()
-    local unfulfilled_requirements = {}
+function technology_node:get_any_unfulfilled_requirement()
+    self:calculate_unfulfilled_requirements()
+    local next_node, _ = next(self.unfulfilled_requirements)
+    return next_node
+end
+
+function technology_node:calculate_unfulfilled_requirements()
+    if self.unfulfilled_requirements ~= nil then
+        return
+    end
+    self.unfulfilled_requirements = {}
+    self.nr_unfulfilled_requirements = self.nr_requirements - self.nr_fulfilled_requirements
     for requirement, _ in pairs(self.requirements) do
-        if self.fulfilled_requirements[requirement] ~= true then
-            unfulfilled_requirements[requirement] = true
+        if self.fulfilled_requirements[requirement] == nil then
+            self.unfulfilled_requirements[requirement] = true
         end
     end
+end
 
-    return (self.nr_requirements - self.nr_fulfilled_requirements) .. " unfulfilled requirements on " .. concat_requirements(unfulfilled_requirements) .. " ---- " .. self.nr_fulfilled_requirements .. " fulfilled requirements on " .. concat_requirements(self.fulfilled_requirements)
+function technology_node:print_dependencies()
+    self:calculate_unfulfilled_requirements()
+
+    return self.nr_unfulfilled_requirements .. " unfulfilled requirements on " .. concat_requirements(self.unfulfilled_requirements) .. " ---- " .. self.nr_fulfilled_requirements .. " fulfilled requirements on " .. concat_requirements(self.fulfilled_requirements)
 end
 
 return technology_node

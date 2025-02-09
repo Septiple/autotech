@@ -10,7 +10,7 @@ local concat_requirements = require "utils.concat_requirements"
 ---@field configuration Configuration
 ---@field requirements table<string, RequirementNode>
 ---@field nr_requirements int
----@field fulfilled_requirements table<string, boolean>
+---@field fulfilled_requirements table<RequirementNode, boolean>
 ---@field nr_fulfilled_requirements int
 ---@field this_can_fulfil RequirementNode[]
 ---@field technology_unlocks ObjectNode[]
@@ -73,7 +73,7 @@ function object_node:has_no_more_unfulfilled_requirements()
     return self.nr_requirements == self.nr_fulfilled_requirements
 end
 
----@param requirement string
+---@param requirement RequirementNode
 function object_node:on_fulfil_requirement(requirement)
     local fulfilled_requirements = self.fulfilled_requirements
     if fulfilled_requirements[requirement] then
@@ -97,7 +97,7 @@ end
 
 function object_node:print_dependencies()
     local unfulfilled_requirements = {}
-    for requirement, _ in pairs(self.requirements) do
+    for _, requirement in pairs(self.requirements) do
         if self.fulfilled_requirements[requirement] ~= true then
             unfulfilled_requirements[requirement] = true
         end
