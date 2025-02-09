@@ -109,6 +109,7 @@ function auto_tech:run()
 end
 
 function auto_tech:vanilla_massaging()
+    -- Barelling recipes cause tech loops
     for name, recipe in pairs(data.raw["recipe"]) do
         if string.match(name, "%a+%-barrel") then
             if self.configuration.verbose_logging then
@@ -363,7 +364,6 @@ function auto_tech:verify_victory_reachable_tech_graph()
         local current_node = victory_node
         local seen_nodes = {}
         while true do
-            local previous_node = current_node
             current_node = current_node:get_any_unfulfilled_requirement()
             if seen_nodes[current_node] ~= nil then
                 break
@@ -371,17 +371,18 @@ function auto_tech:verify_victory_reachable_tech_graph()
             seen_nodes[current_node] = true
         end
         
-        log("Tech loop detected:")
+        local message = "Tech loop detected: "
         local loop_start = current_node
         local firstIteration = true
-        while loop_start ~= current_node and not firstIteration do
+        while loop_start ~= current_node or firstIteration do
             firstIteration = false
-            log(current_node.printable_name)
+            message = message .. current_node.printable_name .. " -> "
             current_node = current_node:get_any_unfulfilled_requirement()
         end
+        message = message .. loop_start.printable_name
+        log(message)
 
-
-        error("Error: no partial linearisation of the tech graph with the canonical choices allows victory to be reached.")
+        error("Error: no partial linearisation of the tech graph with the canonical choices allows victory to be reached. Details have been printed to the log.")
     end
 end
 
