@@ -92,7 +92,7 @@ function auto_tech:run()
     -- resource
 
     self:run_phase(function()
-        --self:run_phase(self.vanilla_massaging, "vanilla massaging")
+        self:run_phase(self.vanilla_massaging, "vanilla massaging")
         self:run_phase(self.create_nodes, "recipe graph node creation")
         self:run_phase(self.link_nodes, "recipe graph link creation")
         self:run_phase(self.run_custom_mod_dependencies, "custom mod dependencies")
