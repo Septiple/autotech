@@ -14,6 +14,12 @@ local technology_dependency_tracking_node = require "technology_nodes.technology
 ---@field nr_fulfilled_requirements int
 ---@field nodes_that_require_this table<string, TechnologyNode>
 ---@field not_part_of_canonical_path boolean
+---These are filled in later:
+---@field unfulfilled_requirements table<TechnologyNode, TechnologyDependencyTrackingNode>
+---@field nr_unfulfilled_requirements int
+---@field tech_order_index int
+---@field reachable_nodes table<TechnologyNode, boolean>
+---@field reduced_fulfilled_requirements table<TechnologyNode, boolean>
 local technology_node = {}
 technology_node.__index = technology_node
 
@@ -34,6 +40,9 @@ function technology_node:new(object_node, technology_nodes)
     result.nr_fulfilled_requirements = 0
     result.nodes_that_require_this = {}
     result.not_part_of_canonical_path = false
+    result.tech_order_index = 0
+    result.reachable_nodes = { [result] = true }
+    result.reduced_fulfilled_requirements = {}
 
     technology_nodes:add_technology_node(result)
 
@@ -131,7 +140,9 @@ function technology_node:on_fulfil_requirement(requirement)
     return self:has_no_more_unfulfilled_requirements()
 end
 
-function technology_node:on_node_becomes_independent()
+---@param tech_order_index int
+function technology_node:on_node_becomes_independent(tech_order_index)
+    self.tech_order_index = tech_order_index
     local result = {}
     for _, target in pairs(self.nodes_that_require_this) do
         local target_now_is_independent = target:on_fulfil_requirement(self)

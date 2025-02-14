@@ -46,6 +46,7 @@ functor_map[object_types.victory] = victory_functor
 --- @field private object_nodes ObjectNodeStorage
 --- @field private requirement_nodes RequirementNodeStorage
 --- @field private technology_nodes TechnologyNodeStorage
+--- @field private technology_nodes_array TechnologyNode[]
 local auto_tech = {}
 auto_tech.__index = auto_tech
 
@@ -59,6 +60,7 @@ function auto_tech.create(configuration)
     result.object_nodes = object_node_storage:new()
     result.requirement_nodes = requirement_node_storage:new()
     result.technology_nodes = technology_node_storage:new()
+    result.technology_nodes_array = {}
     return result
 end
 
@@ -318,6 +320,8 @@ end
 
 function auto_tech:linearise_tech_graph()
     local verbose_logging = self.configuration.verbose_logging
+    local tech_order_index = 1
+    local tech_node_count = self.technology_nodes:node_count()
     local q = deque.new()
     self.technology_nodes:for_all_nodes(function (technology_node)
         if technology_node:has_no_more_unfulfilled_requirements() then
@@ -332,10 +336,12 @@ function auto_tech:linearise_tech_graph()
         ---@type TechnologyNode
         local next = q:pop_left()
         if verbose_logging then
-            log("Technology " .. next.printable_name .. " is next in the linearisation.")
+            log("Technology " .. next.printable_name .. " is next in the linearisation, it gets index " .. tech_order_index)
         end
 
-        local newly_independent_nodes = next:on_node_becomes_independent()
+        local newly_independent_nodes = next:on_node_becomes_independent(tech_order_index)
+        table.insert(self.technology_nodes_array, next)
+        tech_order_index = tech_order_index + 1
         if verbose_logging then
             for _, node in pairs(newly_independent_nodes) do
                 log("After releasing " .. next.printable_name .. " node " .. node.printable_name .. " is now independent.")
@@ -383,13 +389,13 @@ function auto_tech:verify_victory_reachable_tech_graph()
             current_node, tracking_node = current_node:get_any_unfulfilled_requirement()
             local messages = {}
             while tracking_node.previous ~= nil do
-                messages[#messages + 1] = "Via requirement " .. tracking_node.requirement.printable_name .. " this depends on " .. tracking_node.object.printable_name
+                table.insert(messages, "Via requirement " .. tracking_node.requirement.printable_name .. " this depends on " .. tracking_node.object.printable_name)
                 tracking_node = tracking_node.previous
             end
             if tracking_node.object == previous_node.object_node then
-                messages[#messages + 1] = "This technology has requirements to be researched, namely:"
+                table.insert(messages, "This technology has requirements to be researched, namely:")
             else
-                messages[#messages + 1] = "This technology unlocks " .. tracking_node.object.printable_name
+                table.insert(messages, "This technology unlocks " .. tracking_node.object.printable_name)
             end
             for i = #messages, 1, -1 do
                 log(messages[i])
@@ -402,7 +408,34 @@ function auto_tech:verify_victory_reachable_tech_graph()
 end
 
 function auto_tech:calculate_transitive_reduction()
-
+    local verbose_logging = self.configuration.verbose_logging
+    table.sort(self.technology_nodes_array, function (a, b)
+        return a.tech_order_index < b.tech_order_index
+    end)
+    -- Goralčíková & Koubek (1979)
+    for _, v in ipairs(self.technology_nodes_array) do
+        if verbose_logging then
+            log("Considering " .. v.printable_name)
+        end
+        local targets_in_order = {}
+        for w, _ in pairs(v.fulfilled_requirements) do
+           table.insert(targets_in_order, w)
+        end
+        table.sort(targets_in_order, function (a, b)
+            return a.tech_order_index > b.tech_order_index
+        end)
+        for _, w in ipairs(targets_in_order) do
+            if v.reachable_nodes[w] == nil then
+                v.reduced_fulfilled_requirements[w] = true
+                if verbose_logging then
+                    log("Add dependency on " .. w.printable_name)
+                end
+                for reachable, _ in pairs(w.reachable_nodes) do
+                    v.reachable_nodes[reachable] = true
+                end
+            end
+        end
+    end
 end
 
 function auto_tech:adapt_tech_links()

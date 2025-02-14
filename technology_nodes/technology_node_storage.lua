@@ -36,4 +36,9 @@ function technology_node_storage:for_all_nodes(functor)
     end
 end
 
+---@returns int
+function technology_node_storage:node_count()
+    return #self.nodes
+end
+
 return technology_node_storage
