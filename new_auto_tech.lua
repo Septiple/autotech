@@ -439,7 +439,28 @@ function auto_tech:calculate_transitive_reduction()
 end
 
 function auto_tech:adapt_tech_links()
-
+    if self.configuration.verbose_logging then
+        self.technology_nodes:for_all_nodes(function (technology_node)
+            local factorio_tech = technology_node.object_node.object
+            local existing_dependencies = {}
+            local calculated_dependencies = {}
+            for _, target in pairs(factorio_tech.prerequisites or {}) do
+                existing_dependencies[target] = true
+            end
+            for target, _ in pairs(technology_node.reduced_fulfilled_requirements) do
+                local name = target.object_node.descriptor.name
+                calculated_dependencies[name] = true
+                if existing_dependencies[name] == nil then
+                    log("Calculated dependency " .. name .. " for tech " .. factorio_tech.name .. " does not exist explicitly.")
+                end
+            end
+            for target, _ in pairs(existing_dependencies) do
+                if calculated_dependencies[target] == nil then
+                    log("Existing dependency " .. target .. " for tech " .. factorio_tech.name .. " is not needed according to calculations.")
+                end
+            end
+        end)
+    end
 end
 
 function auto_tech:set_tech_costs()
