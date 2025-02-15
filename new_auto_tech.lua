@@ -208,22 +208,6 @@ function auto_tech:create_nodes()
     end
 
     process_requirement_type(_module_categories, requirement_types.module_category)
-
-    ---Thanks Wube for adding a recycling recipe for this but not the item itself
-    ---@param name string
-    local function add_nonexistent_thing(name)
-        process_object_type({
-            name=name,
-            type="nonexistent",
-        }, item_functor)
-    end
-    add_nonexistent_thing("selection-tool")
-    add_nonexistent_thing("upgrade-planner")
-    add_nonexistent_thing("blueprint-book")
-    add_nonexistent_thing("deconstruction-planner")
-    add_nonexistent_thing("copy-paste-tool")
-    add_nonexistent_thing("cut-paste-tool")
-    add_nonexistent_thing("blueprint")
 end
 
 function auto_tech:link_nodes()
@@ -439,28 +423,35 @@ function auto_tech:calculate_transitive_reduction()
 end
 
 function auto_tech:adapt_tech_links()
-    if self.configuration.verbose_logging then
-        self.technology_nodes:for_all_nodes(function (technology_node)
-            local factorio_tech = technology_node.object_node.object
-            local existing_dependencies = {}
-            local calculated_dependencies = {}
-            for _, target in pairs(factorio_tech.prerequisites or {}) do
-                existing_dependencies[target] = true
+    local verbose_logging = self.configuration.verbose_logging
+    self.technology_nodes:for_all_nodes(function (technology_node)
+        local factorio_tech = technology_node.object_node.object
+        local tech_name = factorio_tech.name
+        local existing_dependencies = {}
+        local calculated_dependencies = {}
+        if factorio_tech.prerequisites == nil then
+            factorio_tech.prerequisites = {}
+        end
+        for _, target in pairs(factorio_tech.prerequisites) do
+            existing_dependencies[target] = true
+        end
+        factorio_tech.prerequisites = {}
+        for target, _ in pairs(technology_node.reduced_fulfilled_requirements) do
+            local target_name = target.object_node.descriptor.name
+            calculated_dependencies[target_name] = true
+            if existing_dependencies[target_name] == nil and verbose_logging then
+                log("Calculated dependency " .. target_name .. " for tech " .. tech_name .. " does not exist explicitly.")
             end
-            for target, _ in pairs(technology_node.reduced_fulfilled_requirements) do
-                local name = target.object_node.descriptor.name
-                calculated_dependencies[name] = true
-                if existing_dependencies[name] == nil then
-                    log("Calculated dependency " .. name .. " for tech " .. factorio_tech.name .. " does not exist explicitly.")
-                end
-            end
+            table.insert(factorio_tech.prerequisites, target_name)
+        end
+        if verbose_logging then
             for target, _ in pairs(existing_dependencies) do
                 if calculated_dependencies[target] == nil then
-                    log("Existing dependency " .. target .. " for tech " .. factorio_tech.name .. " is not needed according to calculations.")
+                    log("Existing dependency " .. target .. " for tech " .. tech_name .. " is not needed according to calculations.")
                 end
             end
-        end)
-    end
+        end
+    end)
 end
 
 function auto_tech:set_tech_costs()
